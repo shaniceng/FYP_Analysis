@@ -3,6 +3,7 @@ package com.example.fyp_analysis;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,32 +13,44 @@ import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     private ArrayList<String> mUserProfileSet;
-    private ArrayList<String> mUSerIDSet;
+    private ArrayList<String> mUserIDSet;
+    private OnItemListener mOnItemListener;
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         // each data item is just a string in this case
         public TextView UserName, UserID;
-        public MyViewHolder(View view) {
+
+        OnItemListener onItemListener;
+        public MyViewHolder(View view, OnItemListener onItemListener) {
             super(view);
             UserID=view.findViewById(R.id.UserIDMain);
             UserName=view.findViewById(R.id.UserNameMain);
+
+            this.onItemListener=onItemListener;
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            onItemListener.OnItemClick(getAdapterPosition());
         }
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public MyAdapter(ArrayList<String> mUSerIDSet, ArrayList<String> mUserProfileSet){
+    public MyAdapter(ArrayList<String> mUserIDSet, ArrayList<String> mUserProfileSet, OnItemListener mOnItemListener){
        this.mUserProfileSet=mUserProfileSet;
-       this.mUSerIDSet=mUSerIDSet;
+       this.mUserIDSet=mUserIDSet;
+       this.mOnItemListener=mOnItemListener;
     }
 
     @NonNull
     @Override
     public MyAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_listener,parent, false);
-        return new MyViewHolder(v);
+        return new MyViewHolder(v, mOnItemListener);
     }
 
 
@@ -46,14 +59,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public void onBindViewHolder(MyViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.UserID.setText(mUSerIDSet.get(position));
+        holder.UserID.setText(mUserIDSet.get(position));
         holder.UserName.setText(mUserProfileSet.get(position));
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mUSerIDSet.size();
+        return mUserIDSet.size();
+    }
+
+    public interface OnItemListener{
+        void OnItemClick(int position);
     }
 }

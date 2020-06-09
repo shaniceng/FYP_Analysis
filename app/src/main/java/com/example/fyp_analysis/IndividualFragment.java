@@ -1,5 +1,6 @@
 package com.example.fyp_analysis;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -8,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.core.Tag;
 
 import java.util.ArrayList;
 
@@ -28,7 +31,7 @@ import java.util.ArrayList;
  * Use the {@link IndividualFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class IndividualFragment extends Fragment {
+public class IndividualFragment extends Fragment implements MyAdapter.OnItemListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -38,9 +41,9 @@ public class IndividualFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private RecyclerView recyclerView;
+    private RecyclerView mrecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private RecyclerView.LayoutManager mlayoutManager;
 
     private FirebaseDatabase firebaseDatabase;
     private ArrayList<String>newUserProfiles;
@@ -83,33 +86,20 @@ public class IndividualFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_individual, container, false);
-        recyclerView = v.findViewById(R.id.user_recycler_view);
+        mrecyclerView = v.findViewById(R.id.user_recycler_view);
         tv=v.findViewById(R.id.textView2);
         getUserName();
-        displayRecyclerView();
+        //InsertRecyclerView();
 
         // Inflate the layout for this fragment
         return v;
-    }
-
-    public void displayRecyclerView(){
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        recyclerView.setHasFixedSize(true);
-        // use a linear layout manager
-        layoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManager);
-        // specify an adapter (see also next example)
-        mAdapter = new MyAdapter(newUserID, newUserProfiles);
-        recyclerView.setAdapter(mAdapter);
-
     }
 
     public void getUserName(){
         newUserProfiles = new ArrayList<>();
         newUserID = new ArrayList<>();
         firebaseDatabase=FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference("Users/");
+        final DatabaseReference databaseReference = firebaseDatabase.getReference("Users/");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -117,9 +107,10 @@ public class IndividualFragment extends Fragment {
                     for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
                         UserProfile userProfile = myDataSnapshot.getValue(UserProfile.class);
                         newUserProfiles.add(userProfile.getUserName());
-                        newUserID.add(dataSnapshot.getValue().toString());
-                       // tv.setText(userProfile.getUserName());
+                        newUserID.add(myDataSnapshot.getKey());
+                       //tv.setText(dataSnapshot.getKey());
                     }
+                    InsertRecyclerView();
                 }
 
 
@@ -130,5 +121,33 @@ public class IndividualFragment extends Fragment {
                 Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
             }
         });
+
+    }
+
+    public void InsertRecyclerView() {
+        mlayoutManager = new LinearLayoutManager(getContext());
+        mrecyclerView.setHasFixedSize(true);
+        mAdapter = new MyAdapter(newUserID, newUserProfiles,this);
+        mrecyclerView.setLayoutManager(mlayoutManager);
+        mrecyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void OnItemClick(int position) {
+        //navigate to new activity
+        //newUserID.get(position);
+        Intent intent=new Intent(getActivity(), IndividualUserDetails.class);
+        intent.putExtra("UserID", newUserID.get(position));
+        startActivity(intent);
+        Log.d("RECYLCERVIEW","CLICKED" + position);
+        //Put the value
+
+//        IndividualUserDetails IUD = new IndividualUserDetails();
+//        Bundle args = new Bundle();
+//        args.putString("UserID", newUserID.get(position));
+//        IUD.setArguments(args);
+//        getActivity().finish();
+////Inflate the fragment
+//        getFragmentManager().beginTransaction().add(R.id.container, IUD).commit();
     }
 }
