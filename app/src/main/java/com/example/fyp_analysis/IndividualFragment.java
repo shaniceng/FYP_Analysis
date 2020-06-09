@@ -2,6 +2,8 @@ package com.example.fyp_analysis;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,6 +11,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
 
 
 /**
@@ -29,6 +41,12 @@ public class IndividualFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+
+    private FirebaseDatabase firebaseDatabase;
+    private ArrayList<String>newUserProfiles;
+    private ArrayList<String>newUserID;
+
+    private TextView tv;
 
     public IndividualFragment() {
         // Required empty public constructor
@@ -55,34 +73,62 @@ public class IndividualFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        View v = inflater.inflate(R.layout.fragment_individual, container, false);
+        recyclerView = v.findViewById(R.id.user_recycler_view);
+        tv=v.findViewById(R.id.textView2);
+        getUserName();
+        displayRecyclerView();
 
-        recyclerView = (RecyclerView) getView().findViewById(R.id.user_recycler_view);
+        // Inflate the layout for this fragment
+        return v;
+    }
 
+    public void displayRecyclerView(){
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true);
-
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-
         // specify an adapter (see also next example)
-//        mAdapter = new MyAdapter(myDataset);
-//        recyclerView.setAdapter(mAdapter);
+        mAdapter = new MyAdapter(newUserID, newUserProfiles);
+        recyclerView.setAdapter(mAdapter);
 
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_individual, container, false);
+    }
+
+    public void getUserName(){
+        newUserProfiles = new ArrayList<>();
+        newUserID = new ArrayList<>();
+        firebaseDatabase=FirebaseDatabase.getInstance();
+        DatabaseReference databaseReference = firebaseDatabase.getReference("Users/");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()) {
+                    for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                        UserProfile userProfile = myDataSnapshot.getValue(UserProfile.class);
+                        newUserProfiles.add(userProfile.getUserName());
+                        newUserID.add(dataSnapshot.getValue().toString());
+                       // tv.setText(userProfile.getUserName());
+                    }
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
