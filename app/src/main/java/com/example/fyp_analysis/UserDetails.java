@@ -1,22 +1,22 @@
 package com.example.fyp_analysis;
 
 public class UserDetails {
-    public String steps;
+    public long steps;
 
     public UserDetails(){
 
     }
 
-    public UserDetails(String steps)
+    public UserDetails(long steps)
     {
         this.steps=steps;
     }
 
-    public String getSteps() {
+    public long getSteps() {
         return steps;
     }
 
-    public void setSteps(String userEmail) {
+    public void setSteps(long userEmail) {
         this.steps = steps;
     }
 

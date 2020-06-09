@@ -112,6 +112,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
     @Override
     public void OnDateClick(int position) {
         Intent intent=new Intent(IndividualUserDetails.this, User_Activity_Track.class);
+        intent.putExtra("USERIDTRACK", user);
         intent.putExtra("UserDate", userDate.get(position));
         startActivity(intent);
 //        Log.d("RECYLCERVIEW","CLICKED" + position);
