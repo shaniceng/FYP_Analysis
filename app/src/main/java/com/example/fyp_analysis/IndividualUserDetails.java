@@ -44,6 +44,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
         userAge=findViewById(R.id.UserAgeDetails);
         userEmail=findViewById(R.id.UserEmailDetails);
         mrecyclerView = findViewById(R.id.UserTrackerRecyclerVew);
+        InsertRecyclerView();
         onBack=findViewById(R.id.onBack);
         onBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,6 +90,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
 //                        UserDetails userDetails = myDataSnapshot.getValue(UserDetails.class);
                         userDate.add(myDataSnapshot.getKey());
                     }
+                    //mAdapter.notifyDataSetChanged();
                     InsertRecyclerView();
                 }
             }
@@ -103,9 +105,9 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
 
     public void InsertRecyclerView() {
         mlayoutManager = new LinearLayoutManager(IndividualUserDetails.this);
+        mrecyclerView.setLayoutManager(mlayoutManager);
         mrecyclerView.setHasFixedSize(true);
         mAdapter = new MyUserDetailsAdapter(userDate,this);
-        mrecyclerView.setLayoutManager(mlayoutManager);
         mrecyclerView.setAdapter(mAdapter);
     }
 

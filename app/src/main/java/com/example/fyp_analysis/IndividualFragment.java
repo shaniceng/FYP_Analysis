@@ -89,7 +89,7 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         mrecyclerView = v.findViewById(R.id.user_recycler_view);
         tv=v.findViewById(R.id.textView2);
         getUserName();
-        //InsertRecyclerView();
+        InsertRecyclerView();
 
         // Inflate the layout for this fragment
         return v;
@@ -110,10 +110,9 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
                         newUserID.add(myDataSnapshot.getKey());
                        //tv.setText(dataSnapshot.getKey());
                     }
-                    InsertRecyclerView();
+                    mAdapter.notifyDataSetChanged();
+                    //InsertRecyclerView();
                 }
-
-
             }
 
             @Override
@@ -126,10 +125,11 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
 
     public void InsertRecyclerView() {
         mlayoutManager = new LinearLayoutManager(getContext());
+        mrecyclerView.setLayoutManager(mlayoutManager);
         mrecyclerView.setHasFixedSize(true);
         mAdapter = new MyAdapter(newUserID, newUserProfiles,this);
-        mrecyclerView.setLayoutManager(mlayoutManager);
         mrecyclerView.setAdapter(mAdapter);
+
     }
 
     @Override

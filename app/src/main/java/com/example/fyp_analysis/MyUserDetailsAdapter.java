@@ -53,7 +53,12 @@ public class MyUserDetailsAdapter extends RecyclerView.Adapter<MyUserDetailsAdap
 
     @Override
     public int getItemCount() {
-        return mUserDate.size();
+        if(mUserDate!=null) {
+            return mUserDate.size();
+        }
+        else{
+            return 0;
+        }
     }
 
     public interface OnDateListener{
