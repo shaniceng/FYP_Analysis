@@ -1,9 +1,12 @@
 package com.example.fyp_analysis;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.FileProvider;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -13,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +27,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.core.Tag;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 
@@ -50,6 +56,8 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private ArrayList<String>newUserID;
 
     private TextView tv;
+
+    private Button exportData;
 
     public IndividualFragment() {
         // Required empty public constructor
@@ -87,9 +95,17 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_individual, container, false);
         mrecyclerView = v.findViewById(R.id.user_recycler_view);
+        exportData=v.findViewById(R.id.Export_everything);
         tv=v.findViewById(R.id.textView2);
         getUserName();
         InsertRecyclerView();
+
+        exportData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                export();
+            }
+        });
 
         // Inflate the layout for this fragment
         return v;
@@ -149,5 +165,34 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
 //        getActivity().finish();
 ////Inflate the fragment
 //        getFragmentManager().beginTransaction().add(R.id.container, IUD).commit();
+    }
+
+    private void export() {
+        //generate data
+        StringBuilder data = new StringBuilder();
+        data.append("Time,Distance");
+        for (int i = 0; i < 5; i++) {
+            data.append("\n" + String.valueOf(i) + "," + String.valueOf(i * i));
+        }
+
+        try {
+            //saving the file into device
+            FileOutputStream out = getActivity().openFileOutput("data.csv", Context.MODE_PRIVATE);
+            out.write((data.toString()).getBytes()); // writing data here
+            out.close();
+
+            //exporting
+            Context context = getContext();
+            File filelocation = new File(getActivity().getFilesDir(), "data.csv");
+            Uri path = FileProvider.getUriForFile(context, "com.example.fyp_analysis", filelocation);
+            Intent fileIntent = new Intent(Intent.ACTION_SEND);
+            fileIntent.setType("text/csv");
+            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
+            fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            fileIntent.putExtra(Intent.EXTRA_STREAM, path);
+            startActivity(Intent.createChooser(fileIntent, "Export to Google Drive"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
