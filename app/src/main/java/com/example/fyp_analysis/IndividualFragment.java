@@ -46,6 +46,7 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private String user;
 
     private RecyclerView mrecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -54,6 +55,13 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private FirebaseDatabase firebaseDatabase;
     private ArrayList<String>newUserProfiles;
     private ArrayList<String>newUserID;
+    private ArrayList<String>newUserAge;
+    private ArrayList<String>newUserEmail;
+    private ArrayList<String>newUserHeight;
+    private ArrayList<String>newUserWeight;
+    private ArrayList<String>newGroup;
+    private ArrayList<String>newUserGender;
+
 
     private TextView tv;
 
@@ -97,12 +105,14 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         mrecyclerView = v.findViewById(R.id.user_recycler_view);
         exportData=v.findViewById(R.id.Export_everything);
         tv=v.findViewById(R.id.textView2);
+        firebaseDatabase= FirebaseDatabase.getInstance();
         getUserName();
         InsertRecyclerView();
 
         exportData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //getUserProfile();
                 export();
             }
         });
@@ -114,7 +124,14 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     public void getUserName(){
         newUserProfiles = new ArrayList<>();
         newUserID = new ArrayList<>();
-        firebaseDatabase=FirebaseDatabase.getInstance();
+        newUserAge = new ArrayList<>();
+        newUserEmail = new ArrayList<>();
+        newUserHeight = new ArrayList<>();
+        newUserWeight = new ArrayList<>();
+        newGroup = new ArrayList<>();
+        newUserGender=new ArrayList<>();
+
+        //firebaseDatabase=FirebaseDatabase.getInstance();
         final DatabaseReference databaseReference = firebaseDatabase.getReference("Users/");
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -124,6 +141,15 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
                         UserProfile userProfile = myDataSnapshot.getValue(UserProfile.class);
                         newUserProfiles.add(userProfile.getUserName());
                         newUserID.add(myDataSnapshot.getKey());
+                        newUserAge.add(userProfile.getUserAge());
+                        newUserEmail.add(userProfile.getUserEmail());
+                        newUserHeight.add(userProfile.getUserHeight());
+                        newUserWeight.add(userProfile.getUserWeight());
+                        newUserGender.add(userProfile.getUserGender());
+                        if(userProfile.getGroup()!=null)
+                            newGroup.add(userProfile.getGroup());
+                        else
+                            newGroup.add(null);
                        //tv.setText(dataSnapshot.getKey());
                     }
                     mAdapter.notifyDataSetChanged();
@@ -170,10 +196,15 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private void export() {
         //generate data
         StringBuilder data = new StringBuilder();
-        data.append("Time,Distance");
-        for (int i = 0; i < 5; i++) {
-            data.append("\n" + String.valueOf(i) + "," + String.valueOf(i * i));
+        data.append("Users,Name,Age,Email,Gender,Height,Weight,Group"); //,Group
+        for (int i = 0; i < newUserID.size(); i++) {
+            data.append("\n" + newUserID.get(i) + "," + newUserProfiles.get(i) + "," + newUserAge.get(i) + "," + newUserEmail.get(i) + ","
+                     + newUserGender.get(i) + ","  + newUserHeight.get(i) + "," + newUserWeight.get(i)  + "," + newGroup.get(i)); //
         }
+//        data.append("Users,Name"); //,Group
+//        for (int i = 0; i < newUserID.size(); i++) {
+//            data.append("\n" + String.valueOf(i) + "," + newUserProfiles.get(i) );
+//        }
 
         try {
             //saving the file into device
@@ -187,12 +218,52 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
             Uri path = FileProvider.getUriForFile(context, "com.example.fyp_analysis", filelocation);
             Intent fileIntent = new Intent(Intent.ACTION_SEND);
             fileIntent.setType("text/csv");
-            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "Data");
+            fileIntent.putExtra(Intent.EXTRA_SUBJECT, "User Profiles");
             fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             fileIntent.putExtra(Intent.EXTRA_STREAM, path);
             startActivity(Intent.createChooser(fileIntent, "Export to Google Drive"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void getUserProfile(){
+        newUserProfiles = new ArrayList<>(); //eg.Shanice
+        newUserID = new ArrayList<>();  //eg. NDnXWC....
+        newUserAge = new ArrayList<>();
+        newUserEmail = new ArrayList<>();
+        newUserHeight = new ArrayList<>();
+        newUserWeight = new ArrayList<>();
+        newGroup = new ArrayList<>();
+
+        //firebaseDatabase=FirebaseDatabase.getInstance();
+        final DatabaseReference databaseReference = firebaseDatabase.getReference("Users/");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()) {
+                    for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                        UserProfile userProfile = myDataSnapshot.getValue(UserProfile.class);
+                        newUserProfiles.add(userProfile.getUserName());
+                        newUserID.add(myDataSnapshot.getKey());
+                        newUserAge.add(userProfile.getUserAge());
+                        newUserEmail.add(userProfile.getUserEmail());
+                        newUserHeight.add(userProfile.getUserHeight());
+                        newUserWeight.add(userProfile.getUserWeight());
+//                        if(userProfile.getGroup()!=null)
+//                            newGroup.add(userProfile.getGroup());
+//                        else
+//                            newGroup.add(null);
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
