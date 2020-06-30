@@ -201,10 +201,6 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
             data.append("\n" + newUserID.get(i) + "," + newUserProfiles.get(i) + "," + newUserAge.get(i) + "," + newUserEmail.get(i) + ","
                      + newUserGender.get(i) + ","  + newUserHeight.get(i) + "," + newUserWeight.get(i)  + "," + newGroup.get(i)); //
         }
-//        data.append("Users,Name"); //,Group
-//        for (int i = 0; i < newUserID.size(); i++) {
-//            data.append("\n" + String.valueOf(i) + "," + newUserProfiles.get(i) );
-//        }
 
         try {
             //saving the file into device
@@ -225,45 +221,5 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void getUserProfile(){
-        newUserProfiles = new ArrayList<>(); //eg.Shanice
-        newUserID = new ArrayList<>();  //eg. NDnXWC....
-        newUserAge = new ArrayList<>();
-        newUserEmail = new ArrayList<>();
-        newUserHeight = new ArrayList<>();
-        newUserWeight = new ArrayList<>();
-        newGroup = new ArrayList<>();
-
-        //firebaseDatabase=FirebaseDatabase.getInstance();
-        final DatabaseReference databaseReference = firebaseDatabase.getReference("Users/");
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.hasChildren()) {
-                    for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
-                        UserProfile userProfile = myDataSnapshot.getValue(UserProfile.class);
-                        newUserProfiles.add(userProfile.getUserName());
-                        newUserID.add(myDataSnapshot.getKey());
-                        newUserAge.add(userProfile.getUserAge());
-                        newUserEmail.add(userProfile.getUserEmail());
-                        newUserHeight.add(userProfile.getUserHeight());
-                        newUserWeight.add(userProfile.getUserWeight());
-//                        if(userProfile.getGroup()!=null)
-//                            newGroup.add(userProfile.getGroup());
-//                        else
-//                            newGroup.add(null);
-
-                    }
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }
