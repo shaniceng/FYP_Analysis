@@ -315,8 +315,8 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
                     if (newDate != null) {
                         for (int i = 0; i < newDate.size(); i++) { //only until end of each user
                             userSteps = new ArrayList<>(); //new set of user
+                            userStepsID=new ArrayList<>();
                             for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) { //all the users
-                                userStepsID=new ArrayList<>();
                                 userStepsID.add(myDataSnapshot.getKey());
                                 if (myDataSnapshot.hasChildren()) {
                                     if (myDataSnapshot.child(newDate.get(i)).child("steps").getValue() == null) {
