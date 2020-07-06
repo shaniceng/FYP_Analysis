@@ -1,19 +1,19 @@
 package com.example.fyp_analysis;
 
 public class StepsPointValue {
-    int steps;
+    long steps;
 
     public StepsPointValue() {
     }
 
-    public StepsPointValue(int steps){
+    public StepsPointValue(long steps){
         this.steps=steps;
     }
-    public int getSteps() {
+    public long getSteps() {
         return steps;
     }
 
-    public void setSteps(int steps) {
+    public void setSteps(long steps) {
         this.steps = steps;
     }
 }
