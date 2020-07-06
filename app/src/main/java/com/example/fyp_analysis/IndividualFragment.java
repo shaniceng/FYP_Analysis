@@ -71,6 +71,10 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private ArrayList<String>userSteps;
     private ArrayList<String>userStepsID;
     private ArrayList<ArrayList<String>> mainArray ;
+    private ArrayList<String>newActivityDate;
+    private ArrayList<String>userActivitiesID;
+    private ArrayList<String>userActivities;
+    private ArrayList<ArrayList<String>> mainActivityArray ;
 
 
 
@@ -119,6 +123,7 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         firebaseDatabase= FirebaseDatabase.getInstance();
         getUserName();
         getSteps();
+        getUserActivities();
         InsertRecyclerView();
         exportData.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -246,9 +251,13 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
             userID += newUserID.get(i) + ",";
         }
         StringBuilder data = new StringBuilder();
-        data.append("Steps\nDate," + userStepsID  ); //+ nameArray
+        data.append("Steps Count\nDate, UserID\n ," + userStepsID  ); //+ nameArray
         for (int i = 0; i < newDate.size(); i++) {
             data.append("\n" + newDate.get(i) + "," + mainArray.get(i)); //
+        }
+        data.append("\n\n\nActivity Tracker\nDate," + userActivitiesID  ); //+ nameArray
+        for (int i = 0; i < newActivityDate.size(); i++) {
+            data.append("\n" + newActivityDate.get(i) + "," + mainActivityArray.get(i)); //
         }
 
         try {
@@ -341,14 +350,75 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         });
     }
 
-//    public static boolean bruteforce(String[] input) {
-//        for (int i = 0; i < input.length; i++) {
-//            for (int j = 0; j < input.length; j++) {
-//                if (input[i].equals(input[j]) && i != j) {
-//                    input[i] = ArrayUtils.remove(input[i], i);
-//                }
-//            }
-//        }
-//        return false;
-//    }
+    private void getUserActivities(){
+        newActivityDate=new ArrayList<>();
+        userActivities=new ArrayList<>();
+        userActivitiesID=new ArrayList<>();
+        mainActivityArray = new ArrayList<ArrayList<String>>();
+
+        final DatabaseReference databaseReference = firebaseDatabase.getReference("Activity Tracker/" );
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()) {
+                    for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) { //all the dates
+                        if(myDataSnapshot.hasChildren()){
+                            for (DataSnapshot meDataSnapshot : myDataSnapshot.getChildren()) {
+                                newActivityDate.add(String.valueOf(meDataSnapshot.getKey()));
+                            }
+                        }
+                    }
+                    //check newDate Array for same date
+                    Set<String> set = new HashSet<>(newActivityDate);
+                    newActivityDate.clear();
+                    newActivityDate.addAll(set);
+                    Collections.sort(newActivityDate);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //check for all steps for each user
+        final DatabaseReference ActivitydatabaseReference = firebaseDatabase.getReference("Activity Tracker/" );
+        ActivitydatabaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) { //retrieve all the users
+                mainActivityArray = new ArrayList<ArrayList<String>>(); //create 2D array list
+                if(dataSnapshot.hasChildren()) {
+                    if (newActivityDate != null) {
+                        for (int i = 0; i < newActivityDate.size(); i++) { //only until end of each user
+                            userActivities = new ArrayList<>(); //new set of user
+                            userActivitiesID=new ArrayList<>();
+                            for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) { //all the users
+                                userActivitiesID.add(myDataSnapshot.getKey());
+                                if (myDataSnapshot.hasChildren()) {
+                                    //read push values
+                                    String key = ActivitydatabaseReference.child(newActivityDate.get(i)).push().getKey();
+                                    Log.d("myTag", String.valueOf(myDataSnapshot.child(newActivityDate.get(i)).getValue()));
+                                     if (myDataSnapshot.child(newActivityDate.get(i)).child(key).child("activity").getValue() == null) {
+                                            userActivities.add("null");
+                                     } else {
+                                            userActivities.add(String.valueOf(myDataSnapshot.child(newActivityDate.get(i)).child("/activity").getValue())); //get steps
+                                     }
+                                }
+                            }
+                            // Log.d("myTag", dateSnapshot.getKey());
+                            //Log.d("myTag2", String.valueOf(myDataSnapshot.child(newDate.get(i)).child("steps").getValue()));
+                            mainActivityArray.add(userActivities); //add each date of steps
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }
