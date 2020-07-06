@@ -9,8 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".User_Activity_Track"></activity>
+        <activity android:name=".User_Activity_Track" />
         <activity android:name=".IndividualUserDetails" />
+        <activity android:name=".User_Step_Only" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,11 +23,11 @@
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.fyp_analysis"
-            android:grantUriPermissions="true"
-            android:exported="false">
+            android:exported="false"
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/provider_paths"/>
+                android:resource="@xml/provider_paths" />
         </provider>
     </application>
 

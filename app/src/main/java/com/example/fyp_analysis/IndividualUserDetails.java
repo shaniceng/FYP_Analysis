@@ -34,7 +34,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
     private TextView userID, userName, userAge, userEmail;
     private FirebaseDatabase firebaseDatabase;
     private String user, username;
-    private Button onBack, exportActivities;
+    private Button onBack, exportActivities,Stepbtn;
     private ArrayList<String>userDate;
     private ArrayList<String>userActivitiesDate;
     private ArrayList<String>userSteps;
@@ -71,6 +71,16 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
             }
         });
         userID.setText(user);
+
+        Stepbtn=findViewById(R.id.steps_btn);
+        Stepbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(IndividualUserDetails.this, User_Step_Only.class);
+                intent.putExtra("UserID", user);
+                startActivity(intent);
+            }
+        });
         getUserDetails();
         getUserDaily();
         getUserActivities();
