@@ -186,11 +186,6 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
         });
     }
 
-    public static String convertDate(String dateInMilliseconds,String dateFormat) {
-        return DateFormat.format(dateFormat, Long.parseLong(dateInMilliseconds)).toString();
-    }
-
-
     public void getUserHeartRate(){
         final SimpleDateFormat simpleDateFormat=new SimpleDateFormat("dd/MM/yyyy hh:mm a");
         final DatabaseReference databaseReference = firebaseDatabase.getReference("Chart Values/" + user);
@@ -259,13 +254,13 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
 
         try {
             //saving the file into device
-            FileOutputStream out = IndividualUserDetails.this.openFileOutput("data.csv", Context.MODE_PRIVATE);
+            FileOutputStream out = IndividualUserDetails.this.openFileOutput(username +"Activities.csv", Context.MODE_PRIVATE);
             out.write((data.toString()).getBytes()); // writing data here
             out.close();
 
             //exporting
             Context context = IndividualUserDetails.this;
-            File filelocation = new File(IndividualUserDetails.this.getFilesDir(), "data.csv");
+            File filelocation = new File(IndividualUserDetails.this.getFilesDir(), username +"Activities.csv");
             Uri path = FileProvider.getUriForFile(context, "com.example.fyp_analysis", filelocation);
             Intent fileIntent = new Intent(Intent.ACTION_SEND);
             fileIntent.setType("text/csv");
