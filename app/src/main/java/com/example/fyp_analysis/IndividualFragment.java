@@ -418,6 +418,9 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
                                     }
                                     else{
                                         //reset array user actiities
+                                        userActivities = new ArrayList<>();
+                                        userActivities.add("null");
+                                        mainActivityArray.add(userActivities);
                                     }
                                 }
 
