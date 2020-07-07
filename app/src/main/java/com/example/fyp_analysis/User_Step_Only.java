@@ -23,9 +23,13 @@ import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 public class User_Step_Only extends AppCompatActivity {
@@ -37,16 +41,20 @@ public class User_Step_Only extends AppCompatActivity {
     ArrayList<String> stepsdate= new ArrayList<String>();
     ArrayList<String> stepsvalue = new ArrayList<String>();
 
+
     String[] stepsArray = { "test1", "test2"};
     List<String> mylist;
     LineGraphSeries<DataPoint> stepsg;
-    //Date x;
     int x;
     int y;
+    Date d,b,c;
 
     private RecyclerView mrecyclerView;
     private RecyclerView.LayoutManager mlayoutManager;
     private RecyclerView.Adapter mAdapter;
+
+    public User_Step_Only() throws ParseException {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,17 +116,60 @@ public class User_Step_Only extends AppCompatActivity {
                     }
                     Log.d("stepsdate size", "SIZE " + stepsdate.size() );
                     GraphView stepgraph = (GraphView)findViewById(R.id.Stepsgraph);
-                    stepsg = new LineGraphSeries<DataPoint>();
-                    for (int i = 0; i < stepsdate.size(); i++) {
+                    //stepsg = new LineGraphSeries<DataPoint>();
+                   /* for (int i = 0; i < stepsdate.size(); i++) {
                         //x = new Date(Integer.parseInt(stepsdate.get(i)));
-                        //x = Integer.parseInt(stepsdate.get(i));
-                        x=i;
-                        y = Integer.parseInt(stepsvalue.get(i));
+                       // x = Integer.parseInt(stepsdate.get(i));
+                        //y = Integer.parseInt(stepsvalue.get(i));
                         stepsg.appendData(new DataPoint (x,y),true,stepsdate.size());
+                    }*/
+
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+                    try {
+                         d = sdf.parse("20200601");
+                    } catch (ParseException ex) {
+                        Log.v("Exception", ex.getLocalizedMessage());
                     }
+                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
+                    try {
+                        b = sdf2.parse("20200602");
+                    } catch (ParseException ex) {
+                        Log.v("Exception", ex.getLocalizedMessage());
+                    }
+                    SimpleDateFormat sdf3 = new SimpleDateFormat("yyyyMMdd");
+                    try {
+                        c = sdf3.parse("20200603");
+                    } catch (ParseException ex) {
+                        Log.v("Exception", ex.getLocalizedMessage());
+                    }
+
+                   // Integer value3 = 20200603;
+                    //int year3 = value3 / 10000;
+                    //int month3 = (value3 % 10000) / 100;
+                    //int day3 = value3 % 100;
+                    //Date d3 = new GregorianCalendar(2020, 06, 03).getTime();
+
+                    LineGraphSeries<DataPoint> stepsg = new LineGraphSeries<>(new DataPoint[] {
+                            new DataPoint(d, 1),
+                            new DataPoint(b, 3),
+                            new DataPoint(c, 2)
+                    });
+
                     stepgraph.addSeries(stepsg);
-                   // stepgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(User_Step_Only.this));
-                  //  stepgraph.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
+
+                    stepgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(User_Step_Only.this));
+                    stepgraph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+
+                    stepgraph.getViewport().setMinX(d.getTime());
+                    stepgraph.getViewport().setMaxX(c.getTime());
+                    stepgraph.getViewport().setMinY(0);
+                    stepgraph.getViewport().setYAxisBoundsManual(true);
+                    stepgraph.getViewport().setXAxisBoundsManual(true);
+
+                    //stepgraph.getViewport().setScalable(true);  // activate horizontal zooming and scrolling
+                    stepgraph.getViewport().setScrollable(true);  // activate horizontal scrolling
+                    //stepgraph.getViewport().setScalableY(true);  // activate horizontal and vertical zooming and scrolling
+                    //stepgraph.getViewport().setScrollableY(true);  // activate vertical scrolling
 
                    // stepgraph.getViewport().setMinX(02052020);
                    // stepgraph.getViewport().setMaxX(22052020);
