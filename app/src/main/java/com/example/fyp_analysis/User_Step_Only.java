@@ -1,5 +1,6 @@
 package com.example.fyp_analysis;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,12 +18,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.jjoe64.graphview.series.OnDataPointTapListener;
+import com.jjoe64.graphview.series.Series;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +44,7 @@ public class User_Step_Only extends AppCompatActivity {
     private String userDate, userID;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference stepDatabaseRef;
+    private Button onBack;
     ArrayList<String> stepsdataarray;
     ArrayList<String> stepsdate= new ArrayList<String>();
     ArrayList<String> stepsvalue = new ArrayList<String>();
@@ -47,7 +55,9 @@ public class User_Step_Only extends AppCompatActivity {
     LineGraphSeries<DataPoint> stepsg;
     int x;
     int y;
-    Date d,b,c;
+    int d1,b1,c1;
+    int minI,maxI;
+    Date d,b,c,min,max;
 
     private RecyclerView mrecyclerView;
     private RecyclerView.LayoutManager mlayoutManager;
@@ -62,120 +72,139 @@ public class User_Step_Only extends AppCompatActivity {
         setContentView(R.layout.activity_user_step_only);
         firebaseDatabase= FirebaseDatabase.getInstance();
 
+        onBack=findViewById(R.id.onBack);
+        onBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
 
         userDate = getIntent().getExtras().getString("UserDate");
         userID=getIntent().getExtras().getString("UserID");
         Log.d("UserID ", String.valueOf( userID));
 
         getUserSteps();
-        Log.d("stepsdate size", "SIZE2" + stepsdate.size() );
-        for (int i = 0; i < stepsdate.size(); i++) {
-            Log.d("SPLIT2", "date" + stepsdate.get(i) + "Steps" + stepsvalue.get(i));
-        }
-       // ArrayAdapter adapter = new ArrayAdapter<String>(this, R.layout.activity_step_listview,mylist);
-        //ListView listView = (ListView)findViewById(R.id.steps_list);
-       // listView.setAdapter(adapter);
-        /*GraphView stepgraph = (GraphView)findViewById(R.id.Stepsgraph);
-        stepsg = new LineGraphSeries<DataPoint>();
-        for (int i = 0; i < stepsdate.size(); i++) {
-            x = Integer.parseInt(stepsdate.get(i));
-            y = Integer.parseInt(stepsvalue.get(i));
-            stepsg.appendData(new DataPoint (x,y),true,stepsdate.size());
-        }
-        stepgraph.addSeries(stepsg); */
-
 
 
     }
     public void getUserSteps(){
+
+
         final DatabaseReference databaseReference = firebaseDatabase.getReference("Steps Count/" + userID );
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        Query dataOrderedByKey = databaseReference.orderByKey();
+        dataOrderedByKey.addValueEventListener(new ValueEventListener() {
 
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                String child = dataSnapshot.getValue().toString();
 
-                    Log.d("Datasnapshot", child);
-                    stepsArray = child.split(",");
-                    Log.d("stepsArray", stepsArray.toString());
-                    child = child.replace("{", "");
-                    child = child.replace("}", "");
-                    child = child.replace("=steps=", ";");
-                    stepsdataarray = new ArrayList<>(Arrays.asList(child.split(",")));
+                    ArrayList<String> stepschildlist = new ArrayList<String>();
+
+                    for (DataSnapshot childSnapshot: dataSnapshot.getChildren()) {
+                        String child2 =childSnapshot.toString();
+                        child2 = child2.replace("DataSnapshot { key = ","");
+                        child2 = child2.replace(" value = {steps=","");
+                        child2 = child2.replace("}","");
+                        child2 = child2.replace(" ","");
+                        stepschildlist.add(child2);
+                    }
+
+                    for (int i = 0; i < stepschildlist.size(); i++) {
+                        Log.d("stepschildlist",  stepschildlist.get(i)); }
+
                     stepsdate = new ArrayList<String>();
                     stepsvalue = new ArrayList<String>();
-                    for (int i = 0; i < stepsdataarray.size(); i++) {
-                        Log.d("SPLIT", "Beforevalue" + stepsdataarray.get(i));
-                        String indexsteps = stepsdataarray.get(i);
-                        String[] splitvalue = indexsteps.split(";");
+                    for (int i = 0; i < stepschildlist.size(); i++) {
+                        String indexsteps = stepschildlist.get(i);
+                        String[] splitvalue = indexsteps.split(",");
                         stepsdate.add(splitvalue[0]);  //date
                         stepsvalue.add(splitvalue[1]);  //value
-                        Log.d("SPLIT1", "date" + stepsdate.get(i) + "Steps" + stepsvalue.get(i));
+                        Log.d("SPLIT", "date" + stepsdate.get(i) + "Steps" + stepsvalue.get(i));
                     }
                     Log.d("stepsdate size", "SIZE " + stepsdate.size() );
+
                     GraphView stepgraph = (GraphView)findViewById(R.id.Stepsgraph);
-                    //stepsg = new LineGraphSeries<DataPoint>();
-                   /* for (int i = 0; i < stepsdate.size(); i++) {
-                        //x = new Date(Integer.parseInt(stepsdate.get(i)));
-                       // x = Integer.parseInt(stepsdate.get(i));
-                        //y = Integer.parseInt(stepsvalue.get(i));
-                        stepsg.appendData(new DataPoint (x,y),true,stepsdate.size());
-                    }*/
 
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-                    try {
-                         d = sdf.parse("20200601");
-                    } catch (ParseException ex) {
-                        Log.v("Exception", ex.getLocalizedMessage());
+                    final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+
+
+                    stepsg = new LineGraphSeries<DataPoint>();
+                    for (int i = 0; i < stepsdate.size(); i++) {
+
+                        try {
+                            b = sdf.parse(stepsdate.get(i));
+                        } catch (ParseException ex) {
+                            Log.v("Exception", ex.getLocalizedMessage());
+                        }
+
+                       if(i==0){
+                           try {
+                           min = sdf.parse(stepsdate.get(i));
+                           } catch (ParseException ex) {
+                           Log.v("Exception", ex.getLocalizedMessage()); }
+                       }
+                        if(i==stepsdate.size()-1){
+                            try {
+                                max = sdf.parse(stepsdate.get(i));
+                            } catch (ParseException ex) {
+                                Log.v("Exception", ex.getLocalizedMessage()); }
+                        }
+
+                        y = Integer.parseInt(stepsvalue.get(i));
+                        stepsg.appendData(new DataPoint (b,y),true,stepsdate.size());
+                           // new DataPoint(x, y);
                     }
-                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
-                    try {
-                        b = sdf2.parse("20200602");
-                    } catch (ParseException ex) {
-                        Log.v("Exception", ex.getLocalizedMessage());
-                    }
-                    SimpleDateFormat sdf3 = new SimpleDateFormat("yyyyMMdd");
-                    try {
-                        c = sdf3.parse("20200603");
-                    } catch (ParseException ex) {
-                        Log.v("Exception", ex.getLocalizedMessage());
-                    }
 
-                   // Integer value3 = 20200603;
-                    //int year3 = value3 / 10000;
-                    //int month3 = (value3 % 10000) / 100;
-                    //int day3 = value3 % 100;
-                    //Date d3 = new GregorianCalendar(2020, 06, 03).getTime();
 
-                    LineGraphSeries<DataPoint> stepsg = new LineGraphSeries<>(new DataPoint[] {
-                            new DataPoint(d, 1),
-                            new DataPoint(b, 3),
-                            new DataPoint(c, 2)
-                    });
-
+                    stepgraph.removeAllSeries();
                     stepgraph.addSeries(stepsg);
 
-                    stepgraph.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(User_Step_Only.this));
-                    stepgraph.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
 
-                    stepgraph.getViewport().setMinX(d.getTime());
-                    stepgraph.getViewport().setMaxX(c.getTime());
+                    stepgraph.getGridLabelRenderer().setLabelFormatter(new DefaultLabelFormatter()
+                    {
+                        @Override
+                        public String formatLabel(double value, boolean isValueX) {
+                            if(isValueX){
+                                return sdf.format(new Date((long)value));
+                            }
+                            else{
+                                return super.formatLabel(value, isValueX);
+                            }
+                        }
+                    });
+
+                    stepgraph.setTitle("Steps");
+                    stepgraph.getViewport().setMinX(min.getTime()-10800000);
+                    stepgraph.getViewport().setMaxX(max.getTime());
                     stepgraph.getViewport().setMinY(0);
+                    stepgraph.getViewport().setMaxY(10000);
                     stepgraph.getViewport().setYAxisBoundsManual(true);
                     stepgraph.getViewport().setXAxisBoundsManual(true);
+                    stepgraph.getViewport().setScrollable(true);
+                    stepgraph.getViewport().setScalable(true);
 
-                    //stepgraph.getViewport().setScalable(true);  // activate horizontal zooming and scrolling
-                    stepgraph.getViewport().setScrollable(true);  // activate horizontal scrolling
-                    //stepgraph.getViewport().setScalableY(true);  // activate horizontal and vertical zooming and scrolling
-                    //stepgraph.getViewport().setScrollableY(true);  // activate vertical scrolling
+                    stepsg.setDrawBackground(true);
 
-                   // stepgraph.getViewport().setMinX(02052020);
-                   // stepgraph.getViewport().setMaxX(22052020);
-                    //stepgraph.getViewport().setXAxisBoundsManual(true);
+                    stepgraph.setBackgroundColor(Color.argb(100, 163, 180, 195));
+                    stepsg.setColor(Color.argb(255, 0, 51, 102));
+                    stepsg.setDrawDataPoints(true);
+                    stepsg.setDataPointsRadius(15);
+                    stepsg.setThickness(10);
+                    stepgraph.getGridLabelRenderer().setNumHorizontalLabels(3);
+                    stepsg.setOnDataPointTapListener(new OnDataPointTapListener() {
+                        @Override
+                        public void onTap(Series series, DataPointInterface dataPoint) {
+                            Date d = new java.sql.Date((long) dataPoint.getX());
+                            SimpleDateFormat format1 = new SimpleDateFormat("yyyy/MM/dd");
+                            String formatted = format1.format(d.getTime());
+                            int IntValueY = (int) dataPoint.getY();
+                            Toast.makeText(User_Step_Only.this, "Steps: "+IntValueY + "  Date: " +formatted, Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
-                    //stepgraph.getGridLabelRenderer().setHumanRounding(false);
                 }
             }
 
