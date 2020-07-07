@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -58,6 +59,7 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mlayoutManager;
 
+    private DatabaseReference mDatabase;
     private FirebaseDatabase firebaseDatabase;
     private ArrayList<String>newUserProfiles;
     private ArrayList<String>newUserID;
@@ -74,7 +76,11 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private ArrayList<String>newActivityDate;
     private ArrayList<String>userActivitiesID;
     private ArrayList<String>userActivities;
+    private ArrayList<String>activitiesArray;
     private ArrayList<ArrayList<String>> mainActivityArray ;
+    private ArrayList<ArrayList<String>> newActivityDatePerP ;
+    private List<String> arr;
+    private int sizeOfPreviousUser=0;
 
 
 
@@ -255,10 +261,21 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         for (int i = 0; i < newDate.size(); i++) {
             data.append("\n" + newDate.get(i) + "," + mainArray.get(i)); //
         }
-        data.append("\n\n\nActivity Tracker\nDate," + userActivitiesID  ); //+ nameArray
-        for (int i = 0; i < newActivityDate.size(); i++) {
-            data.append("\n" + newActivityDate.get(i) + "," + mainActivityArray.get(i)); //
+        data.append("\n\n\nActivity Tracker\nUserID, Date,Activities"  ); //+ userActivitiesID
+        for (int i = 0; i < userActivitiesID.size(); i++) { //assign the values to get first user
+            if(sizeOfPreviousUser != newActivityDatePerP.get(i).size()) {
+                for (int n = 0; n < newActivityDatePerP.get(i).size(); n++) {
+                       data.append("\n" + userActivitiesID.get(i) + "," + newActivityDatePerP.get(i).get(n) + "," + mainActivityArray.get(n + sizeOfPreviousUser)); //\n name,Date,Activities + "," + mainActivityArray.get(n)
+                    //Log.d("myTag10000", String.valueOf(mainActivityArray.get(n)));
+                }
+                sizeOfPreviousUser += newActivityDatePerP.get(i).size();
+            }
+            else {
+                Toast.makeText(getActivity(), "Please Refresh App and Try Again", Toast.LENGTH_SHORT).show();
+            }
+
         }
+        sizeOfPreviousUser=0;
 
         try {
             //saving the file into device
@@ -355,63 +372,65 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         userActivities=new ArrayList<>();
         userActivitiesID=new ArrayList<>();
         mainActivityArray = new ArrayList<ArrayList<String>>();
+        newActivityDatePerP = new ArrayList<ArrayList<String>>();
+
+        mDatabase = FirebaseDatabase.getInstance().getReference("Activity Tracker/");
 
         final DatabaseReference databaseReference = firebaseDatabase.getReference("Activity Tracker/" );
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                userActivitiesID = new ArrayList<>();
                 if(dataSnapshot.hasChildren()) {
                     for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) { //all the dates
+                        userActivitiesID.add(myDataSnapshot.getKey());
                         if(myDataSnapshot.hasChildren()){
+                            newActivityDate=new ArrayList<>();
                             for (DataSnapshot meDataSnapshot : myDataSnapshot.getChildren()) {
                                 newActivityDate.add(String.valueOf(meDataSnapshot.getKey()));
                             }
+                            newActivityDatePerP.add(newActivityDate);
                         }
                     }
-                    //check newDate Array for same date
-                    Set<String> set = new HashSet<>(newActivityDate);
-                    newActivityDate.clear();
-                    newActivityDate.addAll(set);
-                    Collections.sort(newActivityDate);
-
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        //check for all steps for each user
-        final DatabaseReference ActivitydatabaseReference = firebaseDatabase.getReference("Activity Tracker/" );
-        ActivitydatabaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) { //retrieve all the users
                 mainActivityArray = new ArrayList<ArrayList<String>>(); //create 2D array list
-                if(dataSnapshot.hasChildren()) {
-                    if (newActivityDate != null) {
-                        for (int i = 0; i < newActivityDate.size(); i++) { //only until end of each user
-                            userActivities = new ArrayList<>(); //new set of user
-                            userActivitiesID=new ArrayList<>();
-                            for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) { //all the users
-                                userActivitiesID.add(myDataSnapshot.getKey());
-                                if (myDataSnapshot.hasChildren()) {
-                                    //read push values
-                                    String key = ActivitydatabaseReference.child(newActivityDate.get(i)).push().getKey();
-                                    Log.d("myTag", String.valueOf(myDataSnapshot.child(newActivityDate.get(i)).getValue()));
-                                     if (myDataSnapshot.child(newActivityDate.get(i)).child(key).child("activity").getValue() == null) {
-                                            userActivities.add("null");
-                                     } else {
-                                            userActivities.add(String.valueOf(myDataSnapshot.child(newActivityDate.get(i)).child("/activity").getValue())); //get steps
-                                     }
+                if(userActivitiesID.size()!=0 && newActivityDatePerP.size()!=0) {
+                    for (int i = 0; i < userActivitiesID.size(); i++) {
+                        for (int n = 0; n < newActivityDatePerP.get(i).size(); n++) {
+                            //create array for each date
+                            //Log.d("myTag2", String.valueOf(newActivityDatePerP.get(i).get(n)));
+                            //Log.d("myTag3", String.valueOf(userActivitiesID.get(i)));
+                            mDatabase.child(userActivitiesID.get(i)).child(newActivityDatePerP.get(i).get(n)).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.hasChildren()) {
+                                        userActivities = new ArrayList<>(); //create array for each date
+                                        for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                                            if (myDataSnapshot.hasChildren()) {
+                                                userActivities.add(String.valueOf(myDataSnapshot.getValue()));
+                                               Log.d("myTag", String.valueOf(myDataSnapshot.getValue()));
+                                            } else {
+                                                userActivities.add("null");
+                                            }
+                                        }
+                                        mainActivityArray.add(userActivities);
+                                    }
+                                    else{
+                                        //reset array user actiities
+                                    }
                                 }
-                            }
-                            // Log.d("myTag", dateSnapshot.getKey());
-                            //Log.d("myTag2", String.valueOf(myDataSnapshot.child(newDate.get(i)).child("steps").getValue()));
-                            mainActivityArray.add(userActivities); //add each date of steps
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    Toast.makeText(getActivity(), databaseError.getCode(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
+                }
+                else{
+                    //Log.d("myTag4", "failed failed failed ------------------------------");
                 }
             }
 
