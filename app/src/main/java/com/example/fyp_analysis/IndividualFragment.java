@@ -76,10 +76,8 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private ArrayList<String>newActivityDate;
     private ArrayList<String>userActivitiesID;
     private ArrayList<String>userActivities;
-    private ArrayList<String>activitiesArray;
     private ArrayList<ArrayList<String>> mainActivityArray ;
     private ArrayList<ArrayList<String>> newActivityDatePerP ;
-    private List<String> arr;
     private int sizeOfPreviousUser=0;
 
 
