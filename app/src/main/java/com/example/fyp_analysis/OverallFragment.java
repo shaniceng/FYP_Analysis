@@ -312,7 +312,7 @@ public class OverallFragment extends Fragment {
         control_mins_chart.setData(pieData);
         control_mins_chart.setDrawEntryLabels(true);
         control_mins_chart.setUsePercentValues(true);
-        control_mins_chart.setCenterText("Percentage of <150 mins per week");
+        control_mins_chart.setCenterText("Percentage of >150 mins per week");
         control_mins_chart.invalidate();
 
     }
