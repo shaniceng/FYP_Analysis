@@ -16,8 +16,8 @@
 
     <com.jjoe64.graphview.GraphView
         android:id="@+id/Stepsgraph"
-        android:layout_width="355dp"
-        android:layout_height="582dp"
+        android:layout_width="356dp"
+        android:layout_height="511dp"
         android:layout_alignParentTop="true"
         android:layout_marginTop="55dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,7 +25,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/all_steps_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="50dp"
@@ -35,17 +35,17 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button2"
+        android:id="@+id/month_steps_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
         android:text="Month"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button3"
-        app:layout_constraintStart_toEndOf="@+id/button" />
+        app:layout_constraintEnd_toStartOf="@+id/day_steps_btn"
+        app:layout_constraintStart_toEndOf="@+id/all_steps_btn" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/day_steps_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="50dp"
@@ -53,5 +53,25 @@
         android:text="Day"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/selected_date_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Stepsgraph" />
+
+    <TextView
+        android:id="@+id/day_steps_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="TextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/selected_date_tv" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
