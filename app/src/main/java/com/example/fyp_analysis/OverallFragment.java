@@ -56,6 +56,12 @@ public class OverallFragment extends Fragment {
     private ArrayList<String>userID;
     private ArrayList<String>controlUserID;
     private ArrayList<String>interventionUserID;
+    private ArrayList<String>controlSteps;
+    private ArrayList<String>interventionSteps;
+    private ArrayList<Integer> controlMORESteps;
+    private ArrayList<Integer> controlLESSSteps;
+    private ArrayList<Integer> interventionMORESteps;
+    private ArrayList<Integer> interventionLESSSteps;
 
     public OverallFragment() {
         // Required empty public constructor
@@ -97,21 +103,22 @@ public class OverallFragment extends Fragment {
         intervention_steps_chart = view.findViewById(R.id.Isteps_chart_view);
         firebaseDatabase= FirebaseDatabase.getInstance();
         getStepsCount();
-        setupPieControlStepsChart();
-        setUpPieInterventionStepsChart();
+
         
         return view;
     }
 
-    private ArrayList<PieEntry> datavals1(){
+    private ArrayList<PieEntry> controlGrpStepsData(){
         ArrayList<PieEntry> datavals = new ArrayList<>();
-        datavals.add(new PieEntry(15, ">7500"));
-        datavals.add(new PieEntry(200, "<7500"));
-        return datavals;
 
+        if(controlMORESteps!=null) {
+            datavals.add(new PieEntry(controlMORESteps.size(), ">7500")); //Float.parseFloat(controlSteps.get(0))
+            datavals.add(new PieEntry(controlLESSSteps.size(), "<7500"));//Float.parseFloat(controlSteps.get(1))
+        }
+        return datavals;
     }
     private void setupPieControlStepsChart() {
-        PieDataSet pieDataSet = new PieDataSet(datavals1(),"");
+        PieDataSet pieDataSet = new PieDataSet(controlGrpStepsData(),"");
         pieDataSet.setColors(ColorTemplate.PASTEL_COLORS);
         PieData pieData = new PieData(pieDataSet);
         control_steps_chart.setData(pieData);
@@ -122,15 +129,20 @@ public class OverallFragment extends Fragment {
 
     }
 
-    private ArrayList<PieEntry> datavals2(){
+    private ArrayList<PieEntry> interventionGroupStepsData(){
         ArrayList<PieEntry> datavals = new ArrayList<>();
-        datavals.add(new PieEntry(700, ">7500"));
-        datavals.add(new PieEntry(200, "<7500"));
+        if(interventionMORESteps!=null) {
+            datavals.add(new PieEntry(interventionMORESteps.size(), ">7500")); //Float.parseFloat(interventionSteps.get(0))
+            datavals.add(new PieEntry(interventionLESSSteps.size(), "<7500")); //Float.parseFloat(interventionSteps.get(1))
+            Log.d("HELPPPPPP", String.valueOf(interventionMORESteps.size()));
+            Log.d("LOLOLOLO", String.valueOf(interventionLESSSteps.size()));
+        }
+
         return datavals;
 
     }
     private void setUpPieInterventionStepsChart() {
-        PieDataSet pieDataSet = new PieDataSet(datavals2(),"");
+        PieDataSet pieDataSet = new PieDataSet(interventionGroupStepsData(),"");
         pieDataSet.setColors(ColorTemplate.PASTEL_COLORS);
         PieData pieData = new PieData(pieDataSet);
         intervention_steps_chart.setData(pieData);
@@ -152,9 +164,14 @@ public class OverallFragment extends Fragment {
                 userID = new ArrayList<>();
                 controlUserID = new ArrayList<>();
                 interventionUserID = new ArrayList<>();
+                 controlMORESteps=new ArrayList<>();
+                 controlLESSSteps=new ArrayList<>();
+                 interventionMORESteps=new ArrayList<>();
+                 interventionLESSSteps=new ArrayList<>();
+
                 if(dataSnapshot.hasChildren()){
                     for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
-                        userID.add(myDataSnapshot.getKey());
+                        userID.add(myDataSnapshot.getKey()); //get every user id
                         Log.d("mytag",myDataSnapshot.getKey() );
                     }
 
@@ -167,16 +184,79 @@ public class OverallFragment extends Fragment {
                                 //read group
                                 if(dataSnapshot.hasChildren()) {
                                     UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
-                                    if (userProfile.getGroup()== "control") {
-                                        //add to control array
-                                        controlUserID.add(userProfile.getGroup());
-                                        Log.d("u", userProfile.getGroup());
-                                    } else if (userProfile.getGroup() == "intervention") {
-                                        //add to intervention array
-                                        interventionUserID.add(userProfile.getGroup());
-                                        Log.d("userConfirm", userProfile.getGroup());
-                                    } else {
-                                        Log.d("userConfirmIDINARRAYYYY", userProfile.getGroup()); //ERROR HERE CONTINUE HERE!!!___________________________
+                                    String userId = dataSnapshot.getKey();
+                                    switch (userProfile.getGroup()) {
+                                        case "control":
+                                            controlUserID.add(userId); //get individual person
+                                            Log.d("u", userId);
+                                            break;
+                                        case "intervention":
+                                            interventionUserID.add(userId);
+                                            Log.d("userConfirm", userId);
+                                            break;
+                                        default:
+                                            Log.d("userConfirmIDINARRAYYYY", userProfile.getGroup());
+                                            break;
+                                    }
+                                    //get steps
+//                                    controlSteps=new ArrayList<>();
+//                                    interventionSteps=new ArrayList<>();
+                                    controlMORESteps = new ArrayList<>();
+                                    controlLESSSteps = new ArrayList<>();
+                                    interventionMORESteps = new ArrayList<>();
+                                    interventionLESSSteps = new ArrayList<>();
+                                    if (interventionUserID.size() != 0) {
+                                        for (int i = 0; i < interventionUserID.size(); i++) { //get every element
+                                            final DatabaseReference userStepsDatabaseRef = firebaseDatabase.getReference("Steps Count/").child(interventionUserID.get(i)); //get individual user
+                                            userStepsDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    //get individual steps
+                                                    for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                                                        StepsPointValue stepsPointValue = myDataSnapshot.getValue(StepsPointValue.class);
+                                                        if (stepsPointValue.getSteps() >= 7500) {
+                                                            interventionMORESteps.add((int) stepsPointValue.getSteps());
+                                                        } else if (stepsPointValue.getSteps() < 7500) {
+                                                            interventionLESSSteps.add((int) stepsPointValue.getSteps());
+                                                            Log.d("userConfirmSTEPSSSS", String.valueOf(stepsPointValue.getSteps()));
+                                                        }
+                                                        setUpPieInterventionStepsChart();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                    if (controlUserID.size() != 0) {
+                                        for (int i = 0; i < controlUserID.size(); i++) { //get every element
+                                            final DatabaseReference userStepsDatabaseRef = firebaseDatabase.getReference("Steps Count/").child(controlUserID.get(i)); //get individual user
+                                            userStepsDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    //get individual steps
+                                                    for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                                                        StepsPointValue stepsPointValue = myDataSnapshot.getValue(StepsPointValue.class);
+                                                        if (stepsPointValue.getSteps() >= 7500) {
+                                                            controlMORESteps.add((int) stepsPointValue.getSteps());
+                                                        } else if (stepsPointValue.getSteps() < 7500) {
+                                                            controlLESSSteps.add((int) stepsPointValue.getSteps());
+                                                            Log.d("userConfirmSTEPSSSS", String.valueOf(stepsPointValue.getSteps()));
+                                                        }
+                                                        setupPieControlStepsChart();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                }
+                                            });
+                                        }
                                     }
                                 }
                             }
@@ -187,36 +267,6 @@ public class OverallFragment extends Fragment {
                             }
                         });
                     }//end for loop
-
-
-                    //now alr have each control grp lst and intervention list
-                    //get steps count data with that list
-                    if(interventionUserID.size()!=0) {
-                        for (int i = 0; i < interventionUserID.size(); i++) {
-                            Log.d("userID", "lololol--------------------------------------------");
-                            final DatabaseReference userDatabaseRef = firebaseDatabase.getReference("Steps Count/").child(interventionUserID.get(i)); //get steps count
-                            userDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.hasChildren()) {
-                                        for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
-                                            Log.d("userID", String.valueOf(myDataSnapshot.getValue()));
-                                        }
-                                    } else {
-
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-
-                        }
-                    }
-
-
                 }
             }
 
@@ -225,8 +275,6 @@ public class OverallFragment extends Fragment {
 
             }
         });
-
-
     }
 
 
