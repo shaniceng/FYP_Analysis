@@ -1,11 +1,13 @@
 package com.example.fyp_analysis;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -46,22 +49,28 @@ public class OverallFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private PieChart control_steps_chart, intervention_steps_chart;
+    private PieChart control_steps_chart, intervention_steps_chart, control_mins_chart, intervention_mins_chart;
     //private AnyChartView intervention_steps_chart; //control_steps_chart
-    String[] months ={"Jan", "Feb", "Mar"};
-    int[] earnings ={500, 800,2000};
-    int[] colour = new int[]{ Color.BLUE, Color.LTGRAY,Color.CYAN, Color.DKGRAY, Color.RED};
+//    String[] months ={"Jan", "Feb", "Mar"};
+//    int[] earnings ={500, 800,2000};
+//    int[] colour = new int[]{ Color.BLUE, Color.LTGRAY,Color.CYAN, Color.DKGRAY, Color.RED};
 
     private FirebaseDatabase firebaseDatabase;
-    private ArrayList<String>userID;
-    private ArrayList<String>controlUserID;
+    private ArrayList<String> userID;
+    private ArrayList<String> controlUserID;
     private ArrayList<String>interventionUserID;
-    private ArrayList<String>controlSteps;
-    private ArrayList<String>interventionSteps;
     private ArrayList<Integer> controlMORESteps;
     private ArrayList<Integer> controlLESSSteps;
     private ArrayList<Integer> interventionMORESteps;
     private ArrayList<Integer> interventionLESSSteps;
+
+    private ArrayList<Integer> controlMOREMins;
+    private ArrayList<Integer> controlLESSMins;
+    private ArrayList<Integer> interventionMOREMins;
+    private ArrayList<Integer> interventionLESSMins;
+    private int duration, mins, sec;
+    private ArrayList<Float> mModerateMinsInterventionArray;
+    private SharedPreferences prefs;
 
     public OverallFragment() {
         // Required empty public constructor
@@ -99,10 +108,14 @@ public class OverallFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_overall, container, false);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         control_steps_chart = view.findViewById(R.id.Csteps_chart_view);
         intervention_steps_chart = view.findViewById(R.id.Isteps_chart_view);
+        control_mins_chart=view.findViewById(R.id.Cmins_chart_view);
+        intervention_mins_chart=view.findViewById(R.id.Imins_chart_view);
         firebaseDatabase= FirebaseDatabase.getInstance();
         getStepsCount();
+//        getMins();
 
         
         return view;
@@ -258,6 +271,8 @@ public class OverallFragment extends Fragment {
                                             });
                                         }
                                     }
+
+                                    getMins();
                                 }
                             }
 
@@ -266,7 +281,9 @@ public class OverallFragment extends Fragment {
 
                             }
                         });
+
                     }//end for loop
+
                 }
             }
 
@@ -275,6 +292,239 @@ public class OverallFragment extends Fragment {
 
             }
         });
+    }
+
+
+    //start of mins code
+    private ArrayList<PieEntry> controlMinsData(){
+        ArrayList<PieEntry> datavals = new ArrayList<>();
+
+        if(controlMOREMins!=null) {
+            datavals.add(new PieEntry(controlMOREMins.size(), ">7500"));
+            datavals.add(new PieEntry(controlLESSMins.size(), "<7500"));
+        }
+        return datavals;
+    }
+    private void setupPieControlMinsChart() {
+        PieDataSet pieDataSet = new PieDataSet(controlMinsData(),"");
+        pieDataSet.setColors(ColorTemplate.LIBERTY_COLORS);
+        PieData pieData = new PieData(pieDataSet);
+        control_mins_chart.setData(pieData);
+        control_mins_chart.setDrawEntryLabels(true);
+        control_mins_chart.setUsePercentValues(true);
+        control_mins_chart.setCenterText("Percentage of <150 mins per week");
+        control_mins_chart.invalidate();
+
+    }
+
+    private ArrayList<PieEntry> interventionMinsData(){
+        ArrayList<PieEntry> datavals = new ArrayList<>();
+        if(interventionMOREMins!=null) {
+            datavals.add(new PieEntry(interventionMOREMins.size(), ">7500"));
+            datavals.add(new PieEntry(interventionLESSMins.size(), "<7500"));
+        }
+        return datavals;
+    }
+
+    private void setUpPieInterventionMinsChart() {
+        PieDataSet pieDataSet = new PieDataSet(interventionMinsData(),"");
+        pieDataSet.setColors(ColorTemplate.LIBERTY_COLORS);
+        PieData pieData = new PieData(pieDataSet);
+        intervention_mins_chart.setData(pieData);
+        intervention_mins_chart.setDrawEntryLabels(true);
+        intervention_mins_chart.setUsePercentValues(true);
+        intervention_mins_chart.setCenterText("Percentage of >150 mins per week");
+        intervention_mins_chart.invalidate();
+    }
+
+
+    private void getMins(){
+        if(userID!=null){
+            controlMOREMins = new ArrayList<>();
+            controlLESSMins = new ArrayList<>();
+            interventionMOREMins = new ArrayList<>();
+            interventionLESSMins = new ArrayList<>();
+            mModerateMinsInterventionArray=new ArrayList<>();
+            if (interventionUserID.size() != 0) {
+                for (int i = 0; i < interventionUserID.size(); i++) { //get every element
+                    final DatabaseReference userMinsDatabaseRef = firebaseDatabase.getReference("Activity Tracker/").child(interventionUserID.get(i)); //get individual user
+                    userMinsDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            //get individual mins
+                            if(dataSnapshot.hasChildren()) {
+                                for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                                    if(myDataSnapshot.hasChildren()) {
+                                        for (DataSnapshot minsDataSnapshot : myDataSnapshot.getChildren()) {
+                                            LockInValue lockInValue = minsDataSnapshot.getValue(LockInValue.class);
+                                            //differentiate week number here
+                                            Log.d("userConfirmDateS", myDataSnapshot.getKey());
+                                            if (!prefs.contains("weekNumberChecking")) {
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putInt("weekNumberChecking", 0);
+                                                editor.commit();
+                                            }
+                                            int year = Integer.parseInt(myDataSnapshot.getKey())/10000;
+                                            int month = (Integer.parseInt(myDataSnapshot.getKey())%10000)/100;
+                                            int date = Integer.parseInt(myDataSnapshot.getKey())%100;
+                                            Calendar calendar = Calendar.getInstance();
+                                            calendar.set(Calendar.YEAR, year);
+                                            calendar.set(Calendar.MONTH, month);
+                                            calendar.set(Calendar.DATE, date);
+                                            int weekNo = calendar.get(Calendar.WEEK_OF_YEAR);
+                                            Log.d("userweek", String.valueOf(weekNo));
+
+                                            if(weekNo == (prefs.getInt("weekNumberChecking", 0))){
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putInt("weekNumberChecking", weekNo);
+                                                editor.commit();
+
+                                                if (lockInValue.getDuration() != null) {
+                                                    duration = Integer.parseInt(lockInValue.getDuration().replaceAll("[\\D]", ""));
+                                                    mins = duration / 100;
+                                                    sec = duration % 100;
+                                                    mModerateMinsInterventionArray.add((float) (mins+(sec/60)));
+                                                    double mIarray = calculateSumOfModerateMins(mModerateMinsInterventionArray);
+                                                    if (mIarray >= 150) { //for everyweek
+                                                        interventionMOREMins.add((int) mIarray);
+
+                                                    } else if (mIarray < 150) {
+                                                        interventionLESSMins.add((int) mIarray);
+                                                        Log.d("userConfirmMINSSS", String.valueOf(mIarray));
+                                                    }
+                                                }
+
+
+                                            }else{
+                                                //send to weeklyModerateMins
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putInt("weekNumberChecking", weekNo);
+                                                editor.commit();
+                                                mModerateMinsInterventionArray=new ArrayList<>();
+
+                                                if (lockInValue.getDuration() != null) {
+                                                    duration = Integer.parseInt(lockInValue.getDuration().replaceAll("[\\D]", ""));
+                                                    mins = duration / 100;
+                                                    sec = duration % 100;
+                                                    mModerateMinsInterventionArray.add((float) (mins+(sec/60)));
+                                                    double mIarray = calculateSumOfModerateMins(mModerateMinsInterventionArray);
+                                                    if (mIarray >= 150) { //for everyweek
+                                                        interventionMOREMins.add((int) mIarray);
+
+                                                    } else if (mIarray < 150) {
+                                                        interventionLESSMins.add((int) mIarray);
+                                                        Log.d("userConfirmMINSSS", String.valueOf(mIarray));
+                                                    }
+                                                }
+                                            }
+                                            setUpPieInterventionMinsChart();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            if (controlUserID.size() != 0) {
+                for (int i = 0; i < controlUserID.size(); i++) { //get every element
+                    final DatabaseReference userMinsDatabaseRef = firebaseDatabase.getReference("Activity Tracker/").child(controlUserID.get(i)); //get individual user
+                    userMinsDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            //get individual mins
+                            if(dataSnapshot.hasChildren()) {
+                                for (DataSnapshot myDataSnapshot : dataSnapshot.getChildren()) {
+                                    if (myDataSnapshot.hasChildren()) {
+                                        for (DataSnapshot minsDataSnapshot : myDataSnapshot.getChildren()) {
+                                            LockInValue lockInValue = minsDataSnapshot.getValue(LockInValue.class);
+                                            //differentiate week number here
+                                            Log.d("userConfirmDateS", myDataSnapshot.getKey());
+                                            if (!prefs.contains("weekNumberChecking")) {
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putInt("weekNumberChecking", 0);
+                                                editor.commit();
+                                            }
+                                            int year = Integer.parseInt(myDataSnapshot.getKey())/10000;
+                                            int month = (Integer.parseInt(myDataSnapshot.getKey())%10000)/100;
+                                            int date = Integer.parseInt(myDataSnapshot.getKey())%100;
+                                            Calendar calendar = Calendar.getInstance();
+                                            calendar.set(Calendar.YEAR, year);
+                                            calendar.set(Calendar.MONTH, month);
+                                            calendar.set(Calendar.DATE, date);
+                                            int weekNo = calendar.get(Calendar.WEEK_OF_YEAR);
+                                            Log.d("userweek", String.valueOf(weekNo));
+
+                                            if(weekNo == (prefs.getInt("weekNumberChecking", 0))){
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putInt("weekNumberChecking", weekNo);
+                                                editor.commit();
+
+                                                if (lockInValue.getDuration() != null) {
+                                                    duration = Integer.parseInt(lockInValue.getDuration().replaceAll("[\\D]", ""));
+                                                    mins = duration / 100;
+                                                    sec = duration % 100;
+                                                    mModerateMinsInterventionArray.add((float) (mins+(sec/60)));
+                                                    double mIarray = calculateSumOfModerateMins(mModerateMinsInterventionArray);
+                                                    if (mIarray >= 150) { //for everyweek
+                                                        interventionMOREMins.add((int) mIarray);
+
+                                                    } else if (mIarray < 150) {
+                                                        interventionLESSMins.add((int) mIarray);
+                                                        Log.d("userConfirmMINSSS", String.valueOf(mIarray));
+                                                    }
+                                                }
+                                            }else{
+                                                //send to weeklyModerateMins
+                                                SharedPreferences.Editor editor = prefs.edit();
+                                                editor.putInt("weekNumberChecking", weekNo);
+                                                editor.commit();
+                                                mModerateMinsInterventionArray=new ArrayList<>();
+
+                                                if (lockInValue.getDuration() != null) {
+                                                    duration = Integer.parseInt(lockInValue.getDuration().replaceAll("[\\D]", ""));
+                                                    mins = duration / 100;
+                                                    sec = duration % 100;
+                                                    mModerateMinsInterventionArray.add((float) (mins+(sec/60)));
+                                                    double mIarray = calculateSumOfModerateMins(mModerateMinsInterventionArray);
+                                                    if (mIarray >= 150) { //for everyweek
+                                                        controlMOREMins.add((int) mIarray);
+
+                                                    } else if (mIarray < 150) {
+                                                        controlLESSMins.add((int) mIarray);
+                                                        Log.d("userConfirmMINSSS", String.valueOf(mIarray));
+                                                    }
+                                                }
+                                                setupPieControlMinsChart();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+        }
+
+    }
+
+    private double calculateSumOfModerateMins(ArrayList<Float> moderateMins){
+        double sum = 0;
+        for(int i = 0; i < moderateMins.size(); i++)
+            sum += moderateMins.get(i);
+        return sum;
     }
 
 
