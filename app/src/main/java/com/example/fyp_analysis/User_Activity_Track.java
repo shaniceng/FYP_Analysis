@@ -103,7 +103,7 @@ public class User_Activity_Track extends AppCompatActivity {
         graphView.removeAllSeries();
         graphView.addSeries(lineGraphSeries);
         //graphView.removeSeries(lineGraphWeekly);
-        graphView.setTitle("Heart Rate(BPM)");
+        graphView.setTitle("Heart Rate(BPM) Today:");
         graphView.getViewport().setMinX(new Date().getTime()-10800000);
         graphView.getViewport().setMaxX(new Date().getTime());
         graphView.getViewport().setMinY(50);
