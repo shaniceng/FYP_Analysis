@@ -4,17 +4,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder>  { //implements Filterable
     private ArrayList<String> mUserProfileSet;
+    private ArrayList<String> mUserProfileSetFULL;
     private ArrayList<String> mUserIDSet;
     private OnItemListener mOnItemListener;
+
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -44,6 +49,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
        this.mUserProfileSet=mUserProfileSet;
        this.mUserIDSet=mUserIDSet;
        this.mOnItemListener=mOnItemListener;
+       mUserProfileSetFULL = new ArrayList<>(mUserProfileSet);
     }
 
 
@@ -68,10 +74,16 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return mUserIDSet.size();
+        return mUserProfileSet.size();
     }
 
     public interface OnItemListener{
         void OnItemClick(int position);
+    }
+
+    public void filterList(ArrayList<String> filteredList) {
+        mUserProfileSet = filteredList;
+        notifyDataSetChanged();
+
     }
 }
