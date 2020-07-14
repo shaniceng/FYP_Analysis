@@ -31,7 +31,7 @@ import java.util.Date;
 
 public class IndividualUserDetails extends AppCompatActivity implements MyUserDetailsAdapter.OnDateListener{
 
-    private TextView userID, userName, userAge, userEmail;
+    private TextView userID, userName, userAge, userEmail, stepsMOREDays, stepsLESSDays ;
     private FirebaseDatabase firebaseDatabase;
     private String user, username;
     private Button onBack, exportActivities,Stepbtn;
@@ -45,6 +45,8 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
     private ArrayList<String>userHeartTime;
     private ArrayList<String>userHeart;
     private ArrayList<String>userHeartDate;
+    private ArrayList<Integer>stepsMoreDay;
+    private ArrayList<Integer>stepsLessDay;
 
     private RecyclerView mrecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -62,6 +64,8 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
         userEmail=findViewById(R.id.UserEmailDetails);
         exportActivities=findViewById(R.id.btnExportActivities);
         mrecyclerView = findViewById(R.id.UserTrackerRecyclerVew);
+        stepsMOREDays = findViewById(R.id.tvStepsDays);
+        stepsLESSDays = findViewById(R.id.tvStepsLESSDays);
         InsertRecyclerView();
         onBack=findViewById(R.id.onBack);
         onBack.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +74,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
                 onBackPressed();
             }
         });
-        userID.setText(user);
+        userID.setText("User ID: " + user);
 
         Stepbtn=findViewById(R.id.steps_btn);
         Stepbtn.setOnClickListener(new View.OnClickListener() {
@@ -92,6 +96,8 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
                 export();
             }
         });
+
+        getStepsTotal();
     }
 
     public void getUserDetails(){
@@ -271,6 +277,40 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void getStepsTotal(){
+        //get total number of days that has more than 7500 steps
+        stepsMoreDay=new ArrayList<>();
+        stepsLessDay=new ArrayList<>();
+        final DatabaseReference databaseReference = firebaseDatabase.getReference("Steps Count/" + user);
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    for(DataSnapshot myDataSnapshot : dataSnapshot.getChildren()){
+                        StepsPointValue stepsPointValue = myDataSnapshot.getValue(StepsPointValue.class);
+                        if(stepsPointValue.getSteps() >= 7500){
+                            stepsMoreDay.add((int) stepsPointValue.getSteps());
+                            Log.d("testingSteps", String.valueOf(stepsPointValue.getSteps()));
+                        }else{
+                            stepsLessDay.add((int) stepsPointValue.getSteps());
+                            Log.d("testingLESSSSSteps", String.valueOf(stepsPointValue.getSteps()));
+                        }
+                    }
+                    if(stepsMoreDay!=null || stepsLessDay!=null) {
+                        stepsMOREDays.setText("Number of days with >=7500 steps per day: " + stepsMoreDay.size());
+                        stepsLESSDays.setText("Number of days with <7500 steps per day: " + stepsLessDay.size());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
 
