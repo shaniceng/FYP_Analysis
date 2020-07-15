@@ -12,6 +12,7 @@
         <activity android:name=".User_Activity_Track" />
         <activity android:name=".IndividualUserDetails" />
         <activity android:name=".User_Step_Only" />
+        <activity android:name=".History_Activity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

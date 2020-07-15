@@ -3,9 +3,12 @@ package com.example.fyp_analysis;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -29,12 +32,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static android.view.View.GONE;
+
 public class IndividualUserDetails extends AppCompatActivity implements MyUserDetailsAdapter.OnDateListener{
 
     private TextView userID, userName, userAge, userEmail;
     private FirebaseDatabase firebaseDatabase;
     private String user, username;
-    private Button onBack, exportActivities,Stepbtn;
+    private Button onBack, exportActivities,Stepbtn,activitybtn;
     private ArrayList<String>userDate;
     private ArrayList<String>userActivitiesDate;
     private ArrayList<String>userSteps;
@@ -81,6 +86,16 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
                 startActivity(intent);
             }
         });
+        activitybtn = findViewById(R.id.activity_btn);
+        activitybtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent=new Intent(IndividualUserDetails.this, History_Activity.class);
+                intent.putExtra("UserID", user);
+                startActivity(intent);
+
+            }
+        });
         getUserDetails();
         getUserDaily();
         getUserActivities();
@@ -93,6 +108,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
             }
         });
     }
+
 
     public void getUserDetails(){
         final DatabaseReference databaseReference = firebaseDatabase.getReference("Users/" + user);
