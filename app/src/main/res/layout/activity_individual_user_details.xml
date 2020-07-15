@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".IndividualUserDetails"
-    android:id="@+id/IndividualUserDetails_container">
+    android:background="@color/colorAccent">
 
     <Button
         android:id="@+id/onBack"
@@ -25,28 +25,52 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/steps_btn">
+
+        <TextView
+            android:id="@+id/UserEmailDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/UserAgeDetails" />
+
+        <TextView
+            android:id="@+id/UserNameDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/UserIDDetails" />
 
         <TextView
             android:id="@+id/UserAgeDetails"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
             android:text="TextView"
-            android:textAlignment="viewStart"
+            android:textAlignment="center"
             android:textColor="#000000"
             android:textSize="18sp"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/UserEmailDetails"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.045"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/UserNameDetails" />
 
@@ -55,48 +79,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginLeft="8dp"
-            android:layout_marginBottom="8dp"
             android:text="TextView"
-            android:textAlignment="viewStart"
+            android:textAlignment="center"
             android:textColor="#000000"
             android:textSize="18sp"
-            app:layout_constraintBottom_toTopOf="@+id/UserNameDetails"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.045"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/UserNameDetails"
+            android:id="@+id/tvStepsDays"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            android:textAlignment="viewStart"
+            android:layout_marginTop="16dp"
+            android:text="Number of more than 7500 steps per day: "
             android:textColor="#000000"
             android:textSize="18sp"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/UserAgeDetails"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.045"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/UserIDDetails" />
+            app:layout_constraintTop_toBottomOf="@+id/UserEmailDetails" />
 
         <TextView
-            android:id="@+id/UserEmailDetails"
+            android:id="@+id/tvStepsLESSDays"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="TextView"
-            android:textAlignment="viewStart"
+            android:text="Number of less than 7500 steps per day: "
             android:textColor="#000000"
             android:textSize="18sp"
-            android:layout_marginLeft="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.045"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/UserAgeDetails" />
+            app:layout_constraintTop_toBottomOf="@+id/tvStepsDays" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -104,6 +120,8 @@
         android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="400dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -116,8 +134,10 @@
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -125,32 +145,33 @@
         android:id="@+id/steps_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/colorPrimary"
+        android:padding="8dp"
         android:text="View Steps"
+        android:textColor="#ffffff"
+        app:layout_constraintBottom_toTopOf="@+id/details"
+        app:layout_constraintEnd_toStartOf="@+id/btnExportActivities"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/details" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnExportActivities"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="170dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp"
+        android:background="@color/colorPrimary"
+        android:padding="8dp"
         android:text="Export User Activities"
+        android:textColor="#ffffff"
         app:layout_constraintBottom_toTopOf="@+id/details"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/onBack"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/activity_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="57dp"
-        android:text="Activity n Heart Rate"
         app:layout_constraintStart_toEndOf="@+id/steps_btn"
-        app:layout_constraintTop_toBottomOf="@+id/details" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.4" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

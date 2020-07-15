@@ -7,35 +7,36 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.FileProvider;
-import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.util.ArrayUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.database.core.Tag;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -56,8 +57,8 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private String user, userID="";
 
     private RecyclerView mrecyclerView;
-    private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mlayoutManager;
+    private MyAdapter mAdapter;
+//    private RecyclerView.LayoutManager mlayoutManager;
 
     private DatabaseReference mDatabase;
     private FirebaseDatabase firebaseDatabase;
@@ -80,8 +81,7 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     private ArrayList<ArrayList<String>> newActivityDatePerP ;
     private int sizeOfPreviousUser=0;
 
-
-
+    private EditText searchEdit;
     private TextView tv;
 
     private Button exportData, exportActivities;
@@ -124,6 +124,7 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         mrecyclerView = v.findViewById(R.id.user_recycler_view);
         exportData=v.findViewById(R.id.Export_everything);
         exportActivities=v.findViewById(R.id.btnExportActivities);
+        searchEdit=v.findViewById(R.id.searchBar);
         firebaseDatabase= FirebaseDatabase.getInstance();
         getUserName();
         getSteps();
@@ -140,6 +141,23 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
             @Override
             public void onClick(View v) {
                 exportActivityData();
+            }
+        });
+
+        searchEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                filter(s.toString());
             }
         });
 
@@ -192,13 +210,30 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
     }
 
     public void InsertRecyclerView() {
-        mlayoutManager = new LinearLayoutManager(getContext());
-        mrecyclerView.setLayoutManager(mlayoutManager);
+        //mlayoutManager = new LinearLayoutManager(getContext());
+        mrecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mrecyclerView.setHasFixedSize(true);
         mAdapter = new MyAdapter(newUserID, newUserProfiles,this);
         mrecyclerView.setAdapter(mAdapter);
 
     }
+
+    private void filter(String text){
+        ArrayList<String> filteredList = new ArrayList<>();
+
+        for (String s : newUserProfiles) {
+            //if the existing elements contains the search input
+            if (s.toLowerCase().contains(text.toLowerCase())) {
+                //adding the element to filtered list
+                filteredList.add(s);
+            }
+        }
+
+        //calling a method of the adapter class and passing the filtered list
+        mAdapter.filterList(filteredList);
+
+    }
+
 
     @Override
     public void OnItemClick(int position) {
@@ -208,16 +243,31 @@ public class IndividualFragment extends Fragment implements MyAdapter.OnItemList
         intent.putExtra("UserID", newUserID.get(position));
         startActivity(intent);
         Log.d("RECYLCERVIEW","CLICKED" + position);
-        //Put the value
 
-//        IndividualUserDetails IUD = new IndividualUserDetails();
-//        Bundle args = new Bundle();
-//        args.putString("UserID", newUserID.get(position));
-//        IUD.setArguments(args);
-//        getActivity().finish();
-////Inflate the fragment
-//        getFragmentManager().beginTransaction().add(R.id.container, IUD).commit();
     }
+
+
+    //    @Override
+//    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+//        inflater = getActivity().getMenuInflater();
+//        inflater.inflate(R.menu.userprofile_menu,menu);
+//
+//        MenuItem searchItem = menu.findItem(R.id.action_search);
+//        SearchView searchView = (SearchView) searchItem.getActionView();
+//
+//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//                //MyAdapter.getFilter().filter(newText);
+//                return false;
+//            }
+//        });
+//    }
 
     private void export() {
         //generate data
