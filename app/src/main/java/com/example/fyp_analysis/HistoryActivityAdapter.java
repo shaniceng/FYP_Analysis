@@ -18,13 +18,14 @@ public class HistoryActivityAdapter extends RecyclerView.Adapter<HistoryActivity
 
     public static class HistoryViewHolder extends RecyclerView.ViewHolder {
         //public ImageView mImageView;
-        public TextView mTextViewActivity, mTextViewDuration;
+        public TextView mTextViewActivity, mTextViewDuration,mTextViewHeartrate;
 
         public HistoryViewHolder(@NonNull View itemView) {
             super(itemView);
             //mImageView=itemView.findViewById(R.id.imageViewPark);
             mTextViewActivity=itemView.findViewById(R.id.tvHistoryActivity);
             mTextViewDuration=itemView.findViewById(R.id.tvHistoryDuration);
+            mTextViewHeartrate=itemView.findViewById(R.id.tvHeartRate);
         }
     }
 
@@ -48,6 +49,7 @@ public class HistoryActivityAdapter extends RecyclerView.Adapter<HistoryActivity
         //holder.mImageView.setImageResource(currentItem.getImageResource());
         holder.mTextViewActivity.setText(currentItem.getmName());
         holder.mTextViewDuration.setText(currentItem.getmDuration());
+        holder.mTextViewHeartrate.setText(currentItem.getmHeartrate());
 
 
     }

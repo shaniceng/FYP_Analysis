@@ -18,16 +18,15 @@
             android:layout_alignParentTop="true"
 
             android:text="Activity Name"
-            android:textSize="13sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tvHistoryDuration2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="188dp"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/tvHistoryDuration"
@@ -36,7 +35,16 @@
             android:layout_marginStart="-210dp"
             android:layout_toEndOf="@+id/tvHistoryDuration2"
             android:text="Duration"
-            android:textSize="16sp" />
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvHeartRate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textSize="15sp"
+            android:layout_marginEnd="7dp"
+            android:text="Heart Rate" />
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

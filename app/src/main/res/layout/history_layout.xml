@@ -15,7 +15,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/activity_constraint_layout"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
         android:layout_marginLeft="8dp"
@@ -33,18 +33,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Steps:"
-
-            android:textSize="30sp"
-            app:layout_constraintBottom_toTopOf="@+id/textView7"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvStartTimeLabel" />
 
         <TextView
             android:id="@+id/tvStartTimeLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Date:"
-            android:textSize="20sp"
-            app:layout_constraintBottom_toTopOf="@+id/tvModAct"
+            android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,11 +50,10 @@
             android:id="@+id/BackgroundStartTime"
             android:layout_width="88dp"
             android:layout_height="22dp"
+            android:layout_marginLeft="5dp"
             android:backgroundTint="#B7BFD5"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:layout_marginLeft="5dp"
-            app:layout_constraintBottom_toTopOf="@+id/tvInsetSteps"
             app:layout_constraintStart_toEndOf="@+id/tvStartTimeLabel"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -66,7 +63,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="1:00pm"
+            android:text="date"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="@+id/BackgroundStartTime"
             app:layout_constraintEnd_toEndOf="@+id/BackgroundStartTime"
             app:layout_constraintStart_toStartOf="@+id/BackgroundStartTime"
@@ -77,11 +75,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
-            android:layout_marginBottom="26dp"
             android:text="0"
-            android:textSize="30sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvModAct" />
+            android:textSize="18sp"
+            app:layout_constraintStart_toEndOf="@+id/tvModAct"
+            app:layout_constraintTop_toBottomOf="@+id/BackgroundStartTime" />
 
         <TextView
             android:id="@+id/textView7"
@@ -89,15 +86,24 @@
             android:layout_height="wrap_content"
             android:text="Activity"
             android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvModAct" />
 
         <TextView
             android:id="@+id/textView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="145dp"
+            android:layout_marginEnd="40dp"
             android:text="Duration"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/textView9" />
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Avg Heart rate"
             android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
