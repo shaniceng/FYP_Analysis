@@ -145,7 +145,7 @@
         android:id="@+id/steps_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="50dp"
         android:layout_marginBottom="8dp"
         android:background="@color/colorPrimary"
@@ -177,9 +177,15 @@
         android:id="@+id/activity_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="45dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="5dp"
-        android:text="Activity n HR"
+        android:background="@color/colorPrimary"
+        android:padding="8dp"
+        android:text="Activity"
         app:layout_constraintBottom_toTopOf="@+id/details"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btnExportActivities"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
