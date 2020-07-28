@@ -322,8 +322,8 @@ public class OverallFragment extends Fragment {
     private ArrayList<PieEntry> interventionMinsData(){
         ArrayList<PieEntry> datavals = new ArrayList<>();
         if(interventionMOREMins!=null) {
-            datavals.add(new PieEntry(interventionMOREMins.size(), ">7500"));
-            datavals.add(new PieEntry(interventionLESSMins.size(), "<7500"));
+            datavals.add(new PieEntry(interventionMOREMins.size(), ">150 mins"));
+            datavals.add(new PieEntry(interventionLESSMins.size(), "<150 mins"));
         }
         return datavals;
     }
