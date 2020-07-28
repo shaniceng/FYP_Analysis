@@ -36,7 +36,7 @@ import static android.view.View.GONE;
 
 public class IndividualUserDetails extends AppCompatActivity implements MyUserDetailsAdapter.OnDateListener{
 
-    private TextView userID, userName, userAge, userEmail, stepsMOREDays, stepsLESSDays ;
+    private TextView userID, userName, userAge, userEmail, stepsMOREDays, stepsLESSDays, group ;
     private FirebaseDatabase firebaseDatabase;
     private String user, username;
     private Button onBack, exportActivities,Stepbtn,activitybtn;
@@ -71,6 +71,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
         mrecyclerView = findViewById(R.id.UserTrackerRecyclerVew);
         stepsMOREDays = findViewById(R.id.tvStepsDays);
         stepsLESSDays = findViewById(R.id.tvStepsLESSDays);
+        group = findViewById(R.id.textGroup);
         InsertRecyclerView();
         onBack=findViewById(R.id.onBack);
         onBack.setOnClickListener(new View.OnClickListener() {
@@ -127,7 +128,7 @@ public class IndividualUserDetails extends AppCompatActivity implements MyUserDe
                     userAge.setText("Age: "+userProfile.getUserAge());
                     userEmail.setText("Email: "+userProfile.getUserEmail());
                     username=userProfile.getUserName();
-
+                    group.setText("Group: " + userProfile.getGroup());
                 }
             }
 
