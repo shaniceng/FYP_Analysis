@@ -198,18 +198,20 @@ public class OverallFragment extends Fragment {
                                 if(dataSnapshot.hasChildren()) {
                                     UserProfile userProfile = dataSnapshot.getValue(UserProfile.class);
                                     String userId = dataSnapshot.getKey();
-                                    switch (userProfile.getGroup()) {
-                                        case "control":
-                                            controlUserID.add(userId); //get individual person
-                                            Log.d("u", userId);
-                                            break;
-                                        case "intervention":
-                                            interventionUserID.add(userId);
-                                            Log.d("userConfirm", userId);
-                                            break;
-                                        default:
-                                            Log.d("userConfirmIDINARRAYYYY", userProfile.getGroup());
-                                            break;
+                                    if(userProfile.getGroup()!=null) {
+                                        switch (userProfile.getGroup()) {
+                                            case "control":
+                                                controlUserID.add(userId); //get individual person
+                                                Log.d("u", userId);
+                                                break;
+                                            case "intervention":
+                                                interventionUserID.add(userId);
+                                                Log.d("userConfirm", userId);
+                                                break;
+                                            default:
+                                                Log.d("userConfirmIDINARRAYYYY", userProfile.getGroup());
+                                                break;
+                                        }
                                     }
                                     //get steps
 //                                    controlSteps=new ArrayList<>();
