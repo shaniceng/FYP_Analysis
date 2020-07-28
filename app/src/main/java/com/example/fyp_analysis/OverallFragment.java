@@ -302,8 +302,8 @@ public class OverallFragment extends Fragment {
         ArrayList<PieEntry> datavals = new ArrayList<>();
 
         if(controlMOREMins!=null) {
-            datavals.add(new PieEntry(controlMOREMins.size(), ">7500"));
-            datavals.add(new PieEntry(controlLESSMins.size(), "<7500"));
+            datavals.add(new PieEntry(controlMOREMins.size(), ">150 mins"));
+            datavals.add(new PieEntry(controlLESSMins.size(), "<150 mins"));
         }
         return datavals;
     }

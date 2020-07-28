@@ -179,7 +179,7 @@
         android:layout_marginBottom="32dp"
         android:background="@color/colorPrimary"
         android:padding="8dp"
-        android:text="Export User Activities"
+        android:text="Export User's Activities"
         android:textColor="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/activity_btn"

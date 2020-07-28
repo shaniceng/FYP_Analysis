@@ -110,7 +110,7 @@
         android:layout_marginBottom="32dp"
         android:background="@color/colorPrimary"
         android:padding="8dp"
-        android:text="Export user activities"
+        android:text="Export users activities"
         android:textColor="#FFFBFB"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
