@@ -36,12 +36,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class User_Step_Only extends AppCompatActivity {
+public class User_Step_Only extends AppCompatActivity  implements DatePickerDialog.OnDateSetListener {
 
     private String daymonth01, daymonth02,daymonth03,daymonth04,daymonth05,daymonth06,daymonth07,daymonth08,daymonth09,daymonth10,daymonth11,daymonth12,daymonth13,daymonth14,daymonth15,daymonth16,daymonth17,daymonth18,
             daymonth19,daymonth20,daymonth21,daymonth22,daymonth23,daymonth24,daymonth25,daymonth26,daymonth27,daymonth28,daymonth29,daymonth30,daymonth31;
-    private int maxday,maxmonth;
-    private String steps;
+    private int maxday,maxmonth,dayselected,monthselected;
+    private String steps,date;
     private String userDate, userID;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference stepDatabaseRef;
@@ -101,17 +101,8 @@ public class User_Step_Only extends AppCompatActivity {
         month_steps_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDatePicker();
-                mDateSetListener = new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        String date = year+ "/" + month ;
-                        MonthDateLimit(year, month, dayOfMonth);
-                        selecteddate.setText(date);
-                        getUserMonthSteps();
-                    }
-                };
-
+                monthselected=1;
+                showDatePickerDailog();
             }
         });
 
@@ -119,20 +110,33 @@ public class User_Step_Only extends AppCompatActivity {
         day_steps_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDatePicker();
-                mDateSetListener = new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        month = month +1;
-                        String date = year+ "/" + month +"/" +  dayOfMonth;
-                        datadate =  year + String.format("%02d", month)  +String.format("%02d", dayOfMonth) ;
-                        selecteddate.setText(date);
-                        getUserDaySteps();
-                    }
-                };
-
+                dayselected =1;
+                showDatePickerDailog();
             }
         });
+
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+
+        if (dayselected ==1){
+            Toast.makeText(getApplicationContext(),"ondataset :",Toast.LENGTH_SHORT).show();
+             month = month +1;
+             date = year+ "/" + month +"/" +  dayOfMonth;
+             datadate =  year + String.format("%02d", month)  +String.format("%02d", dayOfMonth) ;
+             selecteddate.setText(date);
+             getUserDaySteps();
+        }
+        if (monthselected ==1){
+            String date = year+ "/" + month ;    
+            MonthDateLimit(year, month, dayOfMonth);
+            selecteddate.setText(date);
+            getUserMonthSteps();
+
+        }
+        dayselected=0;
+        monthselected=0;
 
     }
 
@@ -300,16 +304,18 @@ public class User_Step_Only extends AppCompatActivity {
         });
     }
 
-    public void showDatePicker(){
-        Calendar cal = Calendar.getInstance();
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        int day = cal.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog dialog = new DatePickerDialog(User_Step_Only.this, android.R.style.Theme_Holo_Light_Dialog_MinWidth,mDateSetListener,year,month,day);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.show();
-    }
+       private void showDatePickerDailog(){
+            DatePickerDialog datePickerDialog = new DatePickerDialog(
+                    this,
+                    android.R.style.Theme_Holo_Light_Dialog_MinWidth,
+                    this,
+                    Calendar.getInstance().get(Calendar.YEAR),
+                    Calendar.getInstance().get(Calendar.MONTH),
+                    Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+            );
+            datePickerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            datePickerDialog.show();
+        }
 
     public void getUserAllSteps(){
 
@@ -355,10 +361,13 @@ public class User_Step_Only extends AppCompatActivity {
                 Toast.makeText(User_Step_Only.this, databaseError.getCode(), Toast.LENGTH_SHORT).show();
             }
         });
+
     }//end getUserAllSteps
 
     public void getUserDaySteps(){
+
         if (datadate != null) {
+
             stepDatabaseRef=FirebaseDatabase.getInstance().getReference();
             stepDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -378,241 +387,299 @@ public class User_Step_Only extends AppCompatActivity {
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) { }
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
             });
+
         }
     }//end getUserDaySteps
 
-    public void getUserMonthSteps(){
+    public void getUserMonthSteps() {
 
-        stepDatabaseRef = FirebaseDatabase.getInstance().getReference();
-        stepDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            stepDatabaseRef = FirebaseDatabase.getInstance().getReference();
+            stepDatabaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                stepsdate = new ArrayList<String>();
-                stepsvalue = new ArrayList<String>();
+                    stepsdate = new ArrayList<String>();
+                    stepsvalue = new ArrayList<String>();
 
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth01).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth01).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth01);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth02).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth02).child("steps").getValue().toString(); }
-                else { steps = "0"; }
-                stepsdate.add(daymonth02);  //date
-                stepsvalue.add(steps);  //value
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth03).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth03).child("steps").getValue().toString(); }
-                else { steps = "0"; }
-                stepsdate.add(daymonth03);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth04).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth04).child("steps").getValue().toString(); }
-                else { steps = "0"; }
-                stepsdate.add(daymonth04);  //date
-                stepsvalue.add(steps);  //value
-
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth05).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth05).child("steps").getValue().toString(); }
-                else { steps = "0"; }
-                stepsdate.add(daymonth05);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth06).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth06).child("steps").getValue().toString(); }
-                else { steps = "0"; }
-                stepsdate.add(daymonth06);  //date
-                stepsvalue.add(steps);  //value
-
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth07).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth07).child("steps").getValue().toString(); }
-                else { steps = "0"; }
-                stepsdate.add(daymonth07);  //date
-                stepsvalue.add(steps);  //value
-
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth08).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth08).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth08);  //date
-                stepsvalue.add(steps);  //value
-
-
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth09).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth09).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth09);  //date
-                stepsvalue.add(steps);  //value
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth10).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth10).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth10);  //date
-                stepsvalue.add(steps);  //value
-
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth11).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth11).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth11);  //date
-                stepsvalue.add(steps);  //value
-
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth12).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth12).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth12);  //date
-                stepsvalue.add(steps);  //value
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth13).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth13).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth13);  //date
-                stepsvalue.add(steps);  //value
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth14).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth14).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth14);  //date
-                stepsvalue.add(steps);  //value
-
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth15).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth15).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth15);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth16).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth16).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth16);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth17).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth17).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth17);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth18).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth18).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth18);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth19).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth19).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth19);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth20).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth20).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth20);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth21).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth21).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth21);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth22).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth22).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth22);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth23).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth23).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth23);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth24).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth24).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth24);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth25).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth25).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth25);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth26).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth26).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth26);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth27).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth27).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth27);  //date
-                stepsvalue.add(steps);  //value
-
-                if (dataSnapshot.child("Steps Count").child(userID).child(daymonth28).hasChild("steps")) {
-                    steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth28).child("steps").getValue().toString(); }
-                else {steps = "0"; }
-                stepsdate.add(daymonth28);  //date
-                stepsvalue.add(steps);  //value
-
-                if(daymonth29!= "0") {
-                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth29).hasChild("steps")) {
-                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth29).child("steps").getValue().toString(); }
-                    else { steps = "0"; }
-                    stepsdate.add(daymonth29);  //date
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth01).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth01).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth01);  //date
                     stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth02).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth02).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth02);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth03).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth03).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth03);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth04).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth04).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth04);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth05).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth05).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth05);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth06).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth06).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth06);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth07).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth07).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth07);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth08).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth08).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth08);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth09).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth09).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth09);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth10).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth10).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth10);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth11).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth11).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth11);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth12).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth12).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth12);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth13).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth13).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth13);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth14).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth14).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth14);  //date
+                    stepsvalue.add(steps);  //value
+
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth15).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth15).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth15);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth16).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth16).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth16);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth17).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth17).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth17);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth18).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth18).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth18);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth19).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth19).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth19);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth20).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth20).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth20);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth21).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth21).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth21);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth22).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth22).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth22);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth23).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth23).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth23);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth24).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth24).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth24);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth25).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth25).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth25);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth26).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth26).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth26);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth27).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth27).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth27);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth28).hasChild("steps")) {
+                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth28).child("steps").getValue().toString();
+                    } else {
+                        steps = "0";
+                    }
+                    stepsdate.add(daymonth28);  //date
+                    stepsvalue.add(steps);  //value
+
+                    if (daymonth29 != "0") {
+                        if (dataSnapshot.child("Steps Count").child(userID).child(daymonth29).hasChild("steps")) {
+                            steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth29).child("steps").getValue().toString();
+                        } else {
+                            steps = "0";
+                        }
+                        stepsdate.add(daymonth29);  //date
+                        stepsvalue.add(steps);  //value
+                    }
+
+                    if (daymonth30 != "0") {
+                        if (dataSnapshot.child("Steps Count").child(userID).child(daymonth30).hasChild("steps")) {
+                            steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth30).child("steps").getValue().toString();
+                        } else {
+                            steps = "0";
+                        }
+                        stepsdate.add(daymonth30);  //date
+                        stepsvalue.add(steps);  //value
+                    }
+
+                    if (daymonth31 != "0") {
+                        if (dataSnapshot.child("Steps Count").child(userID).child(daymonth31).hasChild("steps")) {
+                            steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth31).child("steps").getValue().toString();
+                        } else {
+                            steps = "0";
+                        }
+                        stepsdate.add(daymonth31);  //date
+                        stepsvalue.add(steps);  //value
+                    }
+
+                    for (int i = 0; i < stepsdate.size(); i++) {
+                        Log.d("MONTHDATE", "month_date" + stepsdate.get(i) + "Steps" + stepsvalue.get(i));
+                    }
+                    showGraph();
+
                 }
 
-                if(daymonth30!= "0") {
-                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth30).hasChild("steps")) {
-                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth30).child("steps").getValue().toString(); }
-                    else { steps = "0"; }
-                    stepsdate.add(daymonth30);  //date
-                    stepsvalue.add(steps);  //value
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
                 }
-
-                if(daymonth31!= "0") {
-                    if (dataSnapshot.child("Steps Count").child(userID).child(daymonth31).hasChild("steps")) {
-                        steps = dataSnapshot.child("Steps Count").child(userID).child(daymonth31).child("steps").getValue().toString(); }
-                    else { steps = "0"; }
-                    stepsdate.add(daymonth31);  //date
-                    stepsvalue.add(steps);  //value
-                }
-
-                for (int i = 0; i < stepsdate.size(); i++) {
-                    Log.d("MONTHDATE", "month_date" + stepsdate.get(i) + "Steps" + stepsvalue.get(i));}
-                showGraph();
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        });
+            });
 
     }
 
